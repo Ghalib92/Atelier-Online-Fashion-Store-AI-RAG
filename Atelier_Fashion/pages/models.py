@@ -33,12 +33,12 @@ class Product(models.Model):
         return "Low Stock"
      return "Out of Stock"
 
-def get_availability_class(self):
-    if self.quantity > 10:
+    def get_availability_class(self):
+     if self.quantity > 10:
         return "in-stock"
-    elif self.quantity > 0:
+     elif self.quantity > 0:
         return "low-stock"
-    return "out-of-stock"
+     return "out-of-stock"
     
     def __str__(self):
         return self.name
