@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Alpha Studios{% endblock %}</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary: #7e0564;
+      --primary-dark: #5d044a;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gold: #ffd700;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      position: relative;
+      min-height: 100vh;
+      padding-bottom: 60px; /* Footer height */
+    }
+
+    .welcome-text {
+      background-color: #000;
+      color: white;
+      text-align: center;
+      padding: 0.5rem;
+      font-family: "Playfair Display", serif;
+    }
+
+    .navbar-custom {
+      background-color: white;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-item {
+      position: relative;
+      margin: 0 0.3rem;
+    }
+
+    .nav-link {
+      color: var(--dark);
+      font-weight: 500;
+      padding: 0.75rem 1rem;
+      border-radius: 0.25rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link:focus {
+      color: var(--primary);
+    }
+
+    .nav-link.active {
+      color: white !important;
+      background-color: var(--primary);
+    }
+
+    .nav-link.active:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .dropdown-menu {
+      border: none;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 0.5rem;
+      margin-top: 0.5rem;
+      padding: 0.5rem 0;
+    }
+
+    .dropdown-item {
+      padding: 0.75rem 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+      background-color: rgba(126, 5, 100, 0.1);
+      color: var(--primary);
+    }
+
+    .dropdown-divider {
+      margin: 0.25rem 0;
+      border-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .dropdown-toggle::after {
+      margin-left: 0.5rem;
+      vertical-align: middle;
+      transition: transform 0.2s ease;
+    }
+
+    .footer {
+      padding: 1.5rem;
+      background-color: #000;
+      color: white;
+      text-align: center;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+    }
+
+    /* Mobile menu styles */
+    .navbar-toggler {
+      border: none;
+      padding: 0.5rem;
+    }
+
+    .navbar-toggler:focus {
+      box-shadow: none;
+    }
+
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    /* Desktop hover dropdowns */
+    @media (min-width: 992px) {
+      .dropdown-menu {
+        position: absolute;
+      }
+      
+      .nav-item.dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+      }
+
+      .nav-item.dropdown:hover .dropdown-toggle::after {
+        transform: rotate(180deg);
+      }
+    }
+
+    /* Mobile menu adjustments */
+    @media (max-width: 991.98px) {
+      .navbar-collapse {
+        background-color: white;
+        padding: 1rem;
+        margin-top: 0.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      
+      .nav-item {
+        margin: 0.25rem 0;
+      }
+      
+      .dropdown-menu {
+        position: static;
+        float: none;
+        width: 100%;
+        margin-top: 0;
+        border: none;
+        box-shadow: none;
+        background-color: rgba(248, 249, 250, 0.9);
+      }
+      
+      .dropdown-item {
+        padding-left: 2.5rem;
+      }
+    }
+
+    /* Animation for dropdown arrows */
+    .dropdown-toggle[aria-expanded="true"]::after {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="welcome-text">
+    <h6>Custom fashion. Limitless expression</h6>
+  </div>
+
+  <nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle active" href="#" id="homeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-home me-1"></i> Home
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="homeDropdown">
+              <li><a class="dropdown-item" href="#">Home Option 1</a></li>
+              <li><a class="dropdown-item" href="#">Home Option 2</a></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item" href="#">Home Special</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-calendar-alt me-1"></i> By Occasion
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+              <li><a class="dropdown-item" href="#">Work Wear</a></li>
+              <li><a class="dropdown-item" href="#">Graduation</a></li>
+              <li><a class="dropdown-item" href="#">Party</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-female me-1"></i> Dresses
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+              <li><a class="dropdown-item" href="#">Mini dresses</a></li>
+              <li><a class="dropdown-item" href="#">Maxi dresses</a></li>
+              <li><a class="dropdown-item" href="#">Knee length dresses</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="topsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-tshirt me-1"></i> Tops
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="topsDropdown">
+              <li><a class="dropdown-item" href="#">Crop tops</a></li>
+              <li><a class="dropdown-item" href="#">Bodysuits</a></li>
+              <li><a class="dropdown-item" href="#">Blouses</a></li>
+              <li><a class="dropdown-item" href="#">Wrap tops</a></li>
+              <li><a class="dropdown-item" href="#">Corsets</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="bottomsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-friends me-1"></i> Bottoms
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="bottomsDropdown">
+              <li><a class="dropdown-item" href="#">Pants</a></li>
+              <li><a class="dropdown-item" href="#">Pant sets</a></li>
+              <li><a class="dropdown-item" href="#">Shorts</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="outerwearDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-cloud me-1"></i> Outerwear
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="outerwearDropdown">
+              <li><a class="dropdown-item" href="#">Jackets</a></li>
+              <li><a class="dropdown-item" href="#">Kimonos</a></li>
+              <li><a class="dropdown-item" href="#">Shawls</a></li>
+              <li><a class="dropdown-item" href="#">Cardigans</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="accessoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-gem me-1"></i> Accessories
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="accessoriesDropdown">
+              <li><a class="dropdown-item" href="#">Jewelry</a></li>
+              <li><a class="dropdown-item" href="#">Belts</a></li>
+              <li><a class="dropdown-item" href="#">Sandals</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-4">
+    {% block content %}
+    <!-- Content will be injected here -->
+    {% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p class="mb-0">&copy; 2025 Alpha Studios. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Active link highlighting
+    document.addEventListener("DOMContentLoaded", function() {
+      const navLinks = document.querySelectorAll(".nav-link:not(.dropdown-toggle)");
+      
+      navLinks.forEach(link => {
+        link.addEventListener("click", function() {
+          document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+          const parentDropdown = this.closest('.dropdown-menu')?.previousElementSibling;
+          if (parentDropdown) {
+            parentDropdown.classList.add("active");
+          } else {
+            this.classList.add("active");
+          }
+        });
+      });
+      
+      // Initialize first link as active
+      document.querySelector('.nav-link').classList.add('active');
+    });
+  </script>
+</body>
+</html>

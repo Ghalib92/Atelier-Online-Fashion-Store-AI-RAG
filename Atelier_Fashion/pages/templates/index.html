@@ -1,0 +1,266 @@
+ {% extends 'base.html' %}
+{% load static %}
+{% block title %} Home {% endblock %}
+
+{% block content %}
+<style>
+    .hero-section {
+        background-image: url("{% static 'media/home.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        height: 60vh;
+        width: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .hero-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 1;
+    }
+
+    .home-text {
+        position: relative;
+        z-index: 2;
+        color: white;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .home-text h1 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .home-text h5 {
+        font-size: 1rem;
+        color: #e0e0e0;
+        margin-bottom: 2.5rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .home-text .btn {
+        padding:  10px;
+        font-size: 1rem;
+        border-radius: 30px;
+        margin: 0.75rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .home-text .btn-warning {
+        background-color:  #7e0564;
+        border-color: #ffc107;
+        color:  white;
+    }
+
+    .home-text .btn-warning:hover {
+        background-color:  #7e0564;
+        border-color: #ffc107;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .home-text h1 {
+            font-size: 1.5rem;
+        }
+
+        .home-text h5 {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .home-text .btn {
+            font-size:  20px;
+            padding: 10px;
+            margin: 0.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+       
+        
+        .home-text h1 {
+            font-size: 20px;
+        }
+
+        .home-text h5 {
+            font-size: 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        .home-text .btn {
+            font-size: 0.9rem;
+            padding: 10px;
+            margin: 0.4rem;
+            display: block;
+             
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+</style>
+
+<main>
+    <div class="hero-section">
+        <div class="home-text">
+            <h1>Welcome to <span style="color:#ffc107;">Atelier Fashoions House</span></h1>
+            <h5>Every piece tells your story.</h5>
+            <div class="d-flex flex-wrap justify-content-center">
+                <a href="#" class="btn btn-warning">Login</a>
+                <a href="#" class="btn btn-warning">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+
+ 
+ <div class="container-fluid px-4 py-5">
+    <h1 class="text-center mb-5 display-4 fw-bold" style="font-family: 'Playfair Display', serif; color: #7e0564;">Atelier General Collections</h1>
+    
+    <div class="row g-4">
+        {% for product in products %}
+<!-- Updated Product Card Structure -->
+<div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+    <div class="product-card-wrapper h-100">
+        <div class="card h-100 border-0 shadow-sm">
+            <!-- Product Image -->
+            <div class="position-relative" style="height: 300px; overflow: hidden;">
+                <img src="{{ product.image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ product.name }}">
+                
+             <div class="product-badge position-absolute top-0 end-0 m-3 bg-{{ product.get_availability_class }} text-white rounded-pill px-3 py-1 small">
+                        {{ product.get_availability_display }}
+                    </div>
+                <!-- Action Buttons -->
+                <div class="product-actions position-absolute bottom-0 start-0 end-0 bg-white p-2 d-flex justify-content-center"
+                     style="opacity: 0; transform: translateY(100%); transition: all 0.3s ease;">
+                    <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill"><i class="fas fa-heart"></i></button>
+                    <button class="btn btn-dark btn-sm mx-1 rounded-pill">Add to Cart</button>
+                    <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+                    <p class="card-text text-muted small mb-3">{{ product.description|truncatewords:15 }}</p>
+                    
+                    <div class="product-meta d-flex flex-wrap">
+                        <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
+                            <i class="fas fa-ruler me-1"></i>{{ product.get_size_display }}
+                        </span>
+                        <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
+                            <i class="fas fa-palette me-1"></i>{{ product.color }}
+                        </span>
+                        <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
+                            <i class="fas fa-box-open me-1"></i>{{ product.quantity }} left
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="empty-state">
+                <i class="fas fa-tshirt fa-4x mb-4" style="color: #7e0564;"></i>
+                <h3 class="mb-3">Our Collection is Coming Soon</h3>
+                <p class="text-muted">We're preparing something special for you!</p>
+                <button class="btn btn-outline-dark rounded-pill px-4">Notify Me</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+    
+    .shadow-hover {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .shadow-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(126, 5, 100, 0.15);
+    }
+    
+    .product-badge {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background-color: #7e0564 ;
+    }
+    
+    .bg-in-stock {
+        background-color: #10b981 !important;
+    }
+    
+    .bg-low-stock {
+        background-color: #f59e0b !important;
+    }
+    
+    .bg-out-of-stock {
+        background-color: #ef4444 !important;
+    }
+    
+    .product-actions {
+        transform: translateY(100%);
+        transition: all 0.3s ease;
+    }
+    .product-card-wrapper {
+        position: relative;
+        overflow: hidden; /* Ensures buttons stay within bounds */
+    }
+    
+    .product-card-wrapper:hover .product-actions {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+    
+    .product-actions {
+        z-index: 10; /* Ensures buttons appear above other elements */
+        box-shadow: 0 -5px 10px rgba(0,0,0,0.1); /* Adds subtle shadow */
+    }
+    
+    .card:hover .product-actions {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    
+    .object-fit-cover {
+        object-fit: cover;
+    }
+    
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+    
+    .empty-state {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #7e0564;
+        border-radius: 12px;
+    }
+    
+    .badge.rounded-pill {
+        padding: 0.35em 0.65em;
+    }
+</style>
+
+</main>
+{% endblock %}
