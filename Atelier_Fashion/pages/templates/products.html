@@ -41,7 +41,11 @@
                      style="opacity: 0; transform: translateY(100%); transition: all 0.3s ease;">
                     <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill"><i class="fas fa-heart"></i></button>
                     <button class="btn btn-dark btn-sm mx-1 rounded-pill">Add to Cart</button>
-                    <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill"><i class="fas fa-eye"></i></button>
+                    <a href="{% url 'product_detail' product.id %}">
+                      <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill">
+                           <i class="fas fa-eye"></i>
+                      </button>
+                    </a>
                 </div>
             </div>
                     <p class="card-text text-muted small mb-3">{{ product.description|truncatewords:15 }}</p>
