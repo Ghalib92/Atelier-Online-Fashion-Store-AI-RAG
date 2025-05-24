@@ -73,3 +73,21 @@
     .badge.rounded-pill {
         padding: 0.35em 0.65em;
     }
+
+
+    
+.category-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  color: #ccb909; /* pink */
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 4px solid #f8bbd0;
+  display: inline-block;
+  padding-bottom: 10px;
+}
+
+.category-title {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}

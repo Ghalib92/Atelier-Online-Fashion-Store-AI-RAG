@@ -1,0 +1,79 @@
+{%extends 'base.html'%}
+{%load static%}
+<link rel="stylesheet" href="{%static 'CSS/main.css'%}">
+
+{% block title %} Category {%endblock%}
+<style>
+
+
+
+
+
+
+
+</style>
+
+<main>
+{% block content %}
+
+
+
+
+ <div class="container-fluid px-4 py-5">
+          
+    <div class="row g-4">
+         <h2 class="category-title text-center">{{ category|title }} Collection</h2>
+
+        {% for product in products %}
+<!-- Updated Product Card Structure -->
+<div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+    <div class="product-card-wrapper h-100">
+        <div class="card h-100 border-0 shadow-sm">
+            <!-- Product Image -->
+            <div class="position-relative" style="height: 300px; overflow: hidden;">
+                <img src="{{ product.image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ product.name }}">
+                
+             <div class="product-badge position-absolute top-0 end-0 m-3 bg-{{ product.get_availability_class }} text-white rounded-pill px-3 py-1 small">
+                        {{ product.get_availability_display }}
+                    </div>
+                <!-- Action Buttons -->
+                <div class="product-actions position-absolute bottom-0 start-0 end-0 bg-white p-2 d-flex justify-content-center"
+                     style="opacity: 0; transform: translateY(100%); transition: all 0.3s ease;">
+                    <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill"><i class="fas fa-heart"></i></button>
+                    <button class="btn btn-dark btn-sm mx-1 rounded-pill">Add to Cart</button>
+                    <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+                    <p class="card-text text-muted small mb-3">{{ product.description|truncatewords:15 }}</p>
+                    
+                    <div class="product-meta d-flex flex-wrap">
+                        <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
+                            <i class="fas fa-ruler me-1"></i>{{ product.get_size_display }}
+                        </span>
+                        <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
+                            <i class="fas fa-palette me-1"></i>{{ product.color }}
+                        </span>
+                        <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
+                            <i class="fas fa-box-open me-1"></i>{{ product.quantity }} left
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+                <div class="empty-state">
+                <i class="fas fa-tshirt fa-4x mb-4" style="color: #7e0564;"></i>
+                <h3 class="mb-3">Our Collection is Coming Soon</h3>
+                <p class="text-muted">We're preparing something special for you!</p>
+                <button class="btn btn-outline-dark rounded-pill px-4">Notify Me</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+
+{%endblock%}
+</main>

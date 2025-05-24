@@ -193,73 +193,74 @@
           </li>
 
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-calendar-alt me-1"></i> By Occasion
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
-              <li><a class="dropdown-item" href="#">Work Wear</a></li>
-              <li><a class="dropdown-item" href="{% url 'graduation' %}">Graduation</a></li>
-              <li><a class="dropdown-item" href="#">Party</a></li>
-            </ul>
-          </li>
+  <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-calendar-alt me-1"></i> By Occasion
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+    <li><a class="dropdown-item" href="{% url 'category_view' 'work_wear' %}">Work Wear</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'graduation' %}">Graduation</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'party' %}">Party</a></li>
+  </ul>
+</li>
 
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-female me-1"></i> Dresses
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="productsDropdown">
-              <li><a class="dropdown-item" href="#">Mini dresses</a></li>
-              <li><a class="dropdown-item" href="#">Maxi dresses</a></li>
-              <li><a class="dropdown-item" href="#">Knee length dresses</a></li>
-            </ul>
-          </li>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-female me-1"></i> Dresses
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="productsDropdown">
+    <li><a class="dropdown-item" href="{% url 'category_view' 'mini_dresses' %}">Mini dresses</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'maxi_dress' %}">Maxi dresses</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'knee_lenth_dress' %}">Knee length dresses</a></li>
+  </ul>
+</li>
 
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="topsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-tshirt me-1"></i> Tops
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="topsDropdown">
-              <li><a class="dropdown-item" href="#">Crop tops</a></li>
-              <li><a class="dropdown-item" href="#">Bodysuits</a></li>
-              <li><a class="dropdown-item" href="#">Blouses</a></li>
-              <li><a class="dropdown-item" href="#">Wrap tops</a></li>
-              <li><a class="dropdown-item" href="#">Corsets</a></li>
-            </ul>
-          </li>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="topsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-tshirt me-1"></i> Tops
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="topsDropdown">
+    <li><a class="dropdown-item" href="{% url 'category_view' 'crop_tops' %}">Crop tops</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'bodysuits' %}">Bodysuits</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'blouses' %}">Blouses</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'wrap_tops' %}">Wrap tops</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'corsets' %}">Corsets</a></li>
+  </ul>
+</li>
 
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="bottomsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-user-friends me-1"></i> Bottoms
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="bottomsDropdown">
-              <li><a class="dropdown-item" href="#">Pants</a></li>
-              <li><a class="dropdown-item" href="#">Pant sets</a></li>
-              <li><a class="dropdown-item" href="#">Shorts</a></li>
-            </ul>
-          </li>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="bottomsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-user-friends me-1"></i> Bottoms
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="bottomsDropdown">
+    <li><a class="dropdown-item" href="{% url 'category_view' 'pants' %}">Pants</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'pants_sets' %}">Pant sets</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'shorts' %}">Shorts</a></li>
+  </ul>
+</li>
 
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="outerwearDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-cloud me-1"></i> Outerwear
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="outerwearDropdown">
-              <li><a class="dropdown-item" href="#">Jackets</a></li>
-              <li><a class="dropdown-item" href="#">Kimonos</a></li>
-              <li><a class="dropdown-item" href="#">Shawls</a></li>
-              <li><a class="dropdown-item" href="#">Cardigans</a></li>
-            </ul>
-          </li>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="outerwearDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-cloud me-1"></i> Outerwear
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="outerwearDropdown">
+    <li><a class="dropdown-item" href="{% url 'category_view' 'jackets' %}">Jackets</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'kimonos' %}">Kimonos</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'shawls' %}">Shawls</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'Cardigans' %}">Cardigans</a></li>
+  </ul>
+</li>
 
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="accessoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-gem me-1"></i> Accessories
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="accessoriesDropdown">
-              <li><a class="dropdown-item" href="#">Jewelry</a></li>
-              <li><a class="dropdown-item" href="#">Belts</a></li>
-              <li><a class="dropdown-item" href="#">Sandals</a></li>
-            </ul>
-          </li>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="accessoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-gem me-1"></i> Accessories
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="accessoriesDropdown">
+    <li><a class="dropdown-item" href="{% url 'category_view' 'jewelry' %}">Jewelry</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'belts' %}">Belts</a></li>
+    <li><a class="dropdown-item" href="{% url 'category_view' 'sandals' %}">Sandals</a></li>
+  </ul>
+</li>
+
         </ul>
       </div>
     </div>
