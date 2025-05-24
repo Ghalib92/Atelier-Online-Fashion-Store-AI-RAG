@@ -1,0 +1,75 @@
+.shadow-hover {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .shadow-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(126, 5, 100, 0.15);
+    }
+    
+    .product-badge {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background-color: #7e0564 ;
+    }
+    
+    .bg-in-stock {
+        background-color: #10b981 !important;
+    }
+    
+    .bg-low-stock {
+        background-color: #f59e0b !important;
+    }
+    
+    .bg-out-of-stock {
+        background-color: red !important;
+    }
+    
+    .product-actions {
+        transform: translateY(100%);
+        transition: all 0.3s ease;
+    }
+    .product-card-wrapper {
+        position: relative;
+        overflow: hidden; /* Ensures buttons stay within bounds */
+    }
+    
+    .product-card-wrapper:hover .product-actions {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+    
+    .product-actions {
+        z-index: 10; /* Ensures buttons appear above other elements */
+        box-shadow: 0 -5px 10px rgba(0,0,0,0.1); /* Adds subtle shadow */
+    }
+    
+    .card:hover .product-actions {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    
+    .object-fit-cover {
+        object-fit: cover;
+    }
+    
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+    
+    .empty-state {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #7e0564;
+        border-radius: 12px;
+    }
+    
+    .badge.rounded-pill {
+        padding: 0.35em 0.65em;
+    }
