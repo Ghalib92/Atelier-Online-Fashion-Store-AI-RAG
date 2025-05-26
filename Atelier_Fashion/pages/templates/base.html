@@ -266,6 +266,13 @@
         </ul>
       </div>
     </div>
+ <a href="{% url 'cart_details' %}" class="nav-link">
+    <i class="fas fa-shopping-cart"></i>
+    <span id="cart-count" class="badge bg-danger">
+        {{ global_cart_count|default:0 }}
+    </span>
+</a>
+
   </nav>
 
   <main class="container my-4">
