@@ -4,27 +4,42 @@
 
 {% block content %}
 <style>
-    .hero-section {
-        background-image: url("{% static 'media/home.jpg' %}");
-        background-size: cover;
-        background-position: center;
-        height: 60vh;
+     .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                    url("{% static 'media/home.jpg' %}") center/cover no-repeat;
+        height: 100vh;
+        min-height: 800px;
         width: 100%;
         position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
         text-align: center;
+        overflow: hidden;
+        isolation: isolate;
     }
 
     .hero-section::before {
-        content: "";
+        content: '';
         position: absolute;
-        top: 0;
+        inset: 0;
+        background: linear-gradient(135deg, 
+                    rgba(126, 5, 100, 0.3) 0%, 
+                    rgba(0, 0, 0, 0.8) 100%);
+        z-index: -1;
+        mix-blend-mode: multiply;
+    }
+
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
         left: 0;
         width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
+        height: 150px;
+        background: linear-gradient(to top, 
+                    rgba(248, 249, 250, 1) 0%, 
+                    rgba(248, 249, 250, 0) 100%);
         z-index: 1;
     }
 
@@ -33,96 +48,435 @@
         z-index: 2;
         color: white;
         padding: 2rem;
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
+        animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
     }
 
     .home-text h1 {
-        font-size: 20px;
-        font-weight: bold;
+        font-family: 'Playfair Display', serif;
+        font-size: 5rem;
+        font-weight: 700;
         margin-bottom: 1.5rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        letter-spacing: -1px;
+        line-height: 1.1;
+        text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .home-text h1 span {
+        color: #ffc107;
+        position: relative;
+        display: inline-block;
+    }
+
+    .home-text h1 span::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: #ffc107;
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+    }
+
+    .hero-section:hover .home-text h1 span::after {
+        transform: scaleX(1);
+        transform-origin: left;
     }
 
     .home-text h5 {
-        font-size: 1rem;
-        color: #e0e0e0;
-        margin-bottom: 2.5rem;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 300;
+        letter-spacing: 1.5px;
+        margin-bottom: 3rem;
+        line-height: 1.6;
+        text-transform: uppercase;
+        opacity: 0.9;
     }
 
-    .home-text .btn {
-        padding:  10px;
+    .btn-premium {
+        padding: 18px 45px;
         font-size: 1rem;
-        border-radius: 30px;
-        margin: 0.75rem;
-        transition: all 0.3s ease;
+        border-radius: 0;
+        margin: 0 15px;
+        transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
         font-weight: 500;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-family: 'Montserrat', sans-serif;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #ffc107;
+        background: transparent;
+        color: white;
+        z-index: 1;
     }
 
-    .home-text .btn-warning {
-        background-color:  #7e0564;
-        border-color: #ffc107;
-        color:  white;
+    .btn-premium::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, 
+                    rgba(126, 5, 100, 0.8) 0%, 
+                    rgba(255, 193, 7, 0.6) 100%);
+        z-index: -1;
+        transform: translateX(-100%);
+        transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
 
-    .home-text .btn-warning:hover {
-        background-color:  #7e0564;
-        border-color: #ffc107;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    .btn-premium:hover {
+        color: white;
+        border-color: transparent;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(126, 5, 100, 0.4);
     }
 
-    /* Mobile responsiveness */
-    @media (max-width: 768px) {
+    .btn-premium:hover::before {
+        transform: translateX(0);
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1199.98px) {
         .home-text h1 {
-            font-size: 1.5rem;
-        }
-
-        .home-text h5 {
-            font-size: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .home-text .btn {
-            font-size:  20px;
-            padding: 10px;
-            margin: 0.5rem;
+            font-size: 4.5rem;
         }
     }
 
-    @media (max-width: 576px) {
-       
+    @media (max-width: 991.98px) {
+        .home-text h1 {
+            font-size: 3.8rem;
+        }
+        
+        .home-text h5 {
+            font-size: 1.3rem;
+        }
+        
+        .btn-premium {
+            padding: 16px 35px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .hero-section {
+            min-height: 700px;
+        }
         
         .home-text h1 {
-            font-size: 20px;
+            font-size: 3rem;
         }
-
+        
         .home-text h5 {
-            font-size: 15px;
-            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
         }
-
-        .home-text .btn {
+        
+        .btn-premium {
+            padding: 14px 25px;
+            margin: 0 10px 15px;
             font-size: 0.9rem;
-            padding: 10px;
-            margin: 0.4rem;
-            display: block;
-             
-            margin-left: auto;
-            margin-right: auto;
         }
     }
+
+    @media (max-width: 575.98px) {
+        .hero-section {
+            min-height: 600px;
+        }
+        
+        .home-text h1 {
+            font-size: 2.5rem;
+        }
+        
+        .home-text h5 {
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+        
+        .btn-container {
+            flex-direction: column;
+        }
+        
+        .btn-premium {
+            width: 80%;
+            margin: 0 auto 15px;
+        }
+    }
+
+    .product-card-wrapper {
+        position: relative;
+        margin-bottom: 2rem;
+        perspective: 1000px;
+        transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .product-card-wrapper:hover {
+        transform: translateY(-10px);
+    }
+
+    .product-card {
+        background: #fff;
+        border: none;
+        border-radius: 0;
+        overflow: hidden;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s ease;
+        height: 100%;
+        position: relative;
+    }
+
+    .product-card:hover {
+        box-shadow: 0 25px 50px rgba(126, 5, 100, 0.15);
+    }
+
+    /* Product Image Container */
+    .product-image-container {
+        height: 320px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .product-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .product-card:hover .product-image-container img {
+        transform: scale(1.05);
+    }
+
+    /* Product Badge */
+    .product-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 6px 15px;
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-weight: 600;
+        font-family: 'Montserrat', sans-serif;
+        border-radius: 0;
+        z-index: 2;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .bg-in-stock {
+        background-color: #10b981 !important;
+    }
+
+    .bg-low-stock {
+        background-color: #f59e0b !important;
+    }
+
+    .bg-out-of-stock {
+        background-color: #ef4444 !important;
+    }
+
+    /* Product Actions */
+    .product-actions {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px;
+        transform: translateY(100%);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        backdrop-filter: blur(5px);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .product-card-wrapper:hover .product-actions {
+        transform: translateY(0);
+    }
+
+    /* Action Buttons */
+    .product-actions .btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border: none;
+        background: rgba(126, 5, 100, 0.9);
+        color: white;
+    }
+
+    .product-actions .btn:hover {
+        background: #000;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-actions .btn-outline-dark {
+        background: transparent;
+        border: 1px solid #7e0564;
+        color: #7e0564;
+    }
+
+    .product-actions .btn-outline-dark:hover {
+        background: #7e0564;
+        color: white;
+    }
+
+    /* Quantity Selector */
+    .add-to-cart-form {
+        width: 100%;
+    }
+
+    .input-group {
+        max-width: 130px;
+        margin: 0 auto;
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .qty-btn {
+        width: 35px;
+        background: #f8f9fa;
+        border: none;
+        transition: all 0.2s ease;
+    }
+
+    .qty-btn:hover {
+        background: #e9ecef;
+    }
+
+    .qty-input {
+        border-left: none;
+        border-right: none;
+        border-top: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+        text-align: center;
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Add to Cart Button */
+    .btn-primary-custom {
+        background: #7e0564;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        width: 100%;
+        margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(126, 5, 100, 0.3);
+    }
+
+    .btn-primary-custom:hover {
+        background: #5a0345;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(126, 5, 100, 0.4);
+    }
+
+    /* Product Info Section */
+    .product-info {
+        padding: 20px;
+    }
+
+    .product-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .product-price {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #7e0564;
+        margin-bottom: 1rem;
+    }
+
+    .product-description {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 1199.98px) {
+        .product-image-container {
+            height: 280px;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .product-image-container {
+            height: 240px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .product-image-container {
+            height: 320px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .product-image-container {
+            height: 280px;
+        }
+        
+        .product-actions {
+            padding: 10px;
+        }
+        
+        .product-actions .btn {
+            width: 36px;
+            height: 36px;
+        }
+    }
+
+
+
 </style>
 
 <main>
-    <div class="hero-section">
+     <div class="hero-section">
         <div class="home-text">
-            <h1>Welcome to <span style="color:#ffc107;">Atelier Fashion House</span></h1>
+            <h1>Welcome to <span>Atelier Fashion House</span></h1>
             <h5>Every piece tells your story.</h5>
-            <div class="d-flex flex-wrap justify-content-center">
-                <a href="#" class="btn btn-warning">Login</a>
-                <a href="#" class="btn btn-warning">Sign Up</a>
+            <div class="btn-container d-flex flex-wrap justify-content-center">
+                <a href="#" class="btn btn-premium">Login</a>
+                <a href="#" class="btn btn-premium">Sign Up</a>
             </div>
         </div>
     </div>
@@ -149,8 +503,21 @@
                 <div class="product-actions position-absolute bottom-0 start-0 end-0 bg-white p-2 d-flex justify-content-center"
                      style="opacity: 0; transform: translateY(100%); transition: all 0.3s ease;">
                     <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill"><i class="fas fa-heart"></i></button>
-                    <button class="btn btn-dark btn-sm mx-1 rounded-pill">Add to Cart</button>
-                   <a href="{% url 'product_detail' product.id %}">
+
+                 <div class="d-flex gap-3 mb-4 align-items-center animate__animated animate__pulse animate__infinite">
+    <form method="POST" action="{% url 'add_to_cart' product.id %}" class="add-to-cart-form w-100" data-product-id="{{ product.id }}">
+        {% csrf_token %}
+        <div class="input-group mb-3" style="max-width: 130px;">
+           <button type="submit" class="btn btn-primary-custom w-100">
+            <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+        </button> 
+        </div>
+
+        
+    </form>
+</div>
+     
+                    <a href="{% url 'product_detail' product.id %}">
                       <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill">
                            <i class="fas fa-eye"></i>
                       </button>
@@ -265,5 +632,14 @@
     }
 </style>
 
+<script>
+
+
+
+
+
+</script>
+
+<script src="{% static 'JS/main.js' %}"></script>
 </main>
 {% endblock %}

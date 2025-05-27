@@ -91,3 +91,159 @@
 .category-title {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+    .product-card-wrapper:hover .product-actions {
+        transform: translateY(0);
+    }
+
+    /* Action Buttons */
+    .product-actions .btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border: none;
+        background: rgba(126, 5, 100, 0.9);
+        color: white;
+    }
+
+    .product-actions .btn:hover {
+        background: #000;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-actions .btn-outline-dark {
+        background: transparent;
+        border: 1px solid #7e0564;
+        color: #7e0564;
+    }
+
+    .product-actions .btn-outline-dark:hover {
+        background: #7e0564;
+        color: white;
+    }
+
+    /* Quantity Selector */
+    .add-to-cart-form {
+        width: 100%;
+    }
+
+    .input-group {
+        max-width: 130px;
+        margin: 0 auto;
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .qty-btn {
+        width: 35px;
+        background: #f8f9fa;
+        border: none;
+        transition: all 0.2s ease;
+    }
+
+    .qty-btn:hover {
+        background: #e9ecef;
+    }
+
+    .qty-input {
+        border-left: none;
+        border-right: none;
+        border-top: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+        text-align: center;
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Add to Cart Button */
+    .btn-primary-custom {
+        background: #7e0564;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        width: 100%;
+        margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(126, 5, 100, 0.3);
+    }
+
+    .btn-primary-custom:hover {
+        background: #5a0345;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(126, 5, 100, 0.4);
+    }
+
+    /* Product Info Section */
+    .product-info {
+        padding: 20px;
+    }
+
+    .product-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .product-price {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #7e0564;
+        margin-bottom: 1rem;
+    }
+
+    .product-description {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 1199.98px) {
+        .product-image-container {
+            height: 280px;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .product-image-container {
+            height: 240px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .product-image-container {
+            height: 320px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .product-image-container {
+            height: 280px;
+        }
+        
+        .product-actions {
+            padding: 10px;
+        }
+        
+        .product-actions .btn {
+            width: 36px;
+            height: 36px;
+        }
+    }
+
