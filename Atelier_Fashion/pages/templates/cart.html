@@ -13,9 +13,9 @@
   </div>
 
   {% if cart and cart.items.all %}
-  <div class="cart-items">
+  <div class="cart-items"   >
     {% for item in cart.items.all %}
-    <div class="cart-item">
+    <div class="cart-item" data-item-id="{{ item.id }}">
       <div class="item-image-container">
         {% if item.product.image %}
         <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="item-image">
@@ -81,7 +81,7 @@
     </div>
     <h3>Your Cart is Empty</h3>
     <p>Looks like you haven't added any items yet</p>
-    <a href="{% url 'products' %}" class="shop-btn">
+    <a href="{% url 'home' %}" class="shop-btn">
       <i class="fas fa-store"></i> Browse Products
     </a>
   </div>
@@ -383,4 +383,85 @@
     }
   }
 </style>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // Update quantity
+  document.querySelectorAll('.quantity-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const itemElement = button.closest('.cart-item');
+      const itemId = itemElement.dataset.itemId;
+      const action = button.classList.contains('plus') ? 'increment' : 'decrement';
+
+      fetch("{% url 'update_cart_quantity' %}", {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `item_id=${itemId}&action=${action}`
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          itemElement.querySelector('.quantity-value').textContent = data.quantity;
+          itemElement.querySelector('.total-amount').textContent = `Ksh ${data.item_total}`;
+          document.querySelector('.cart-summary .total span:last-child').textContent = `Ksh ${data.cart_total}`;
+
+          // Update all cart count elements (cart page + navbar)
+          document.querySelectorAll('.cart-count').forEach(el => {
+            el.textContent = `${data.cart_count} item${data.cart_count === 1 ? '' : 's'}`;
+          });
+
+          // Update navbar cart count directly if it exists
+          const navbarCartCount = document.getElementById('cart-count');
+          if (navbarCartCount) {
+            navbarCartCount.textContent = data.cart_count;
+          }
+        }
+      });
+    });
+  });
+
+  // Remove item
+  document.querySelectorAll('.remove-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const itemElement = button.closest('.cart-item');
+      const itemId = itemElement.dataset.itemId;
+
+      fetch("{% url 'remove_cart_item' %}", {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `item_id=${itemId}`
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          itemElement.remove();
+          document.querySelector('.cart-summary .total span:last-child').textContent = `Ksh ${data.cart_total}`;
+
+          // Update all cart count elements (cart page + navbar)
+          document.querySelectorAll('.cart-count').forEach(el => {
+            el.textContent = `${data.cart_count} item${data.cart_count === 1 ? '' : 's'}`;
+          });
+
+          // Update navbar cart count directly if it exists
+          const navbarCartCount = document.getElementById('cart-count');
+          if (navbarCartCount) {
+            navbarCartCount.textContent = data.cart_count;
+          }
+        }
+      });
+    });
+  });
+
+});
+</script>
+
+
 {% endblock %}

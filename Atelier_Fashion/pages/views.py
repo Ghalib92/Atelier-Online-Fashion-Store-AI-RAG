@@ -50,3 +50,51 @@ def add_to_cart(request, product_id):
 def view_cart(request):
     cart = Cart.objects.filter(user=request.user).first()
     return render(request, 'cart.html', {'cart': cart})
+
+
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+
+@require_POST
+def update_cart_quantity(request):
+    item_id = request.POST.get('item_id')
+    action = request.POST.get('action')
+
+    try:
+        item = CartItem.objects.get(id=item_id, cart__user=request.user)
+        if action == 'increment':
+            item.quantity += 1
+        elif action == 'decrement':
+            if item.quantity > 1:
+                item.quantity -= 1
+        item.save()
+
+        cart = item.cart
+        cart_count = cart.items.aggregate(total=Sum('quantity'))['total'] or 0
+        return JsonResponse({
+            'success': True,
+            'quantity': item.quantity,
+            'item_total': item.total_price,
+            'cart_total': cart.total_price,
+            'cart_count': cart_count,
+        })
+    except CartItem.DoesNotExist:
+        return JsonResponse({'success': False}, status=404)
+
+
+
+@require_POST
+def remove_cart_item(request):
+    item_id = request.POST.get('item_id')
+    try:
+        item = CartItem.objects.get(id=item_id, cart__user=request.user)
+        item.delete()
+        cart = item.cart
+        cart_count = cart.items.aggregate(total=Sum('quantity'))['total'] or 0
+        return JsonResponse({
+            'success': True,
+            'cart_total': cart.total_price,
+            'cart_count': cart_count,
+        })
+    except CartItem.DoesNotExist:
+        return JsonResponse({'success': False}, status=404)
