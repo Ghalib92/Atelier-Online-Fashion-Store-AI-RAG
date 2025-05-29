@@ -348,10 +348,28 @@
 {% block content %}
 
 
-
+<div class="container-fluid d-flex justify-content-center align-items-center mb-5" >
+  <form action="{% url 'product_search' %}" method="get" class="d-flex align-items-center" role="search" style="gap: 10px;">
+    <input class="form-control rounded-pill" 
+           type="search" 
+           name="q" 
+           placeholder="Search products..." 
+           aria-label="Search" 
+           required 
+           style="width: 300px; padding: 10px 20px; font-size: 16px; border: 1px solid #ccc;">
+    
+    <button class="btn btn-dark rounded-pill" 
+            type="submit" 
+            style="padding: 10px 20px; font-size: 16px;">
+      Search
+    </button>
+  </form>
+</div>
 
  <div class="container-fluid px-4 py-5">
           
+
+    
         <div class="row g-4">
         {% for product in products %}
 <!-- Updated Product Card Structure -->

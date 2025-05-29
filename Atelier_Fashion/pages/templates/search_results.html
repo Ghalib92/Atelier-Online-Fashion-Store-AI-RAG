@@ -1,0 +1,31 @@
+ {% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4">Search Results for <em class="text-primary">"{{ query }}"</em></h2>
+
+  {% if results %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for product in results %}
+        <div class="col">
+          <div class="card h-100 shadow-sm border-0">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ product.name }}</h5>
+              <p class="card-text text-muted">{{ product.description|truncatechars:100 }}</p>
+              <p class="fw-bold">Ksh {{ product.price }}</p>
+              <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-dark rounded-pill">View Product</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-warning mt-4" role="alert">
+      <strong>No results found</strong> for your search. Try different keywords.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

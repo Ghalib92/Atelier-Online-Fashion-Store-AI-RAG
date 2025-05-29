@@ -98,3 +98,25 @@ def remove_cart_item(request):
         })
     except CartItem.DoesNotExist:
         return JsonResponse({'success': False}, status=404)
+
+
+
+ 
+from django.shortcuts import render
+from django.db.models import Q
+ 
+
+def product_search(request):
+    query = request.GET.get('q', '').strip()
+    results = ProductCategory.objects.none()
+    
+    if query:
+        results = ProductCategory.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query)
+        )
+
+    return render(request, 'search_results.html', {
+        'query': query,
+        'results': results
+    })
