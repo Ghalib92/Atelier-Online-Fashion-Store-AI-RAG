@@ -69,9 +69,9 @@
       <a href="{% url 'home' %}" class="continue-btn">
         <i class="fas fa-arrow-left"></i> Continue Shopping
       </a>
-      <a href="#" class="checkout-btn">
-        Proceed to Checkout <i class="fas fa-arrow-right"></i>
-      </a>
+      <a href="{% url 'payment_page' %}" class="btn btn-success">
+           Proceed to Checkout
+       </a>
     </div>
   </div>
   {% else %}

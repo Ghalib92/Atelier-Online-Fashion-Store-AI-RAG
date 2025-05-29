@@ -14,6 +14,19 @@ from pathlib import Path
 import os
 from django.contrib.messages import constants as messages
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+MPESA_CONSUMER_KEY = os.getenv('MPESA_CONSUMER_KEY')
+MPESA_CONSUMER_SECRET = os.getenv('MPESA_CONSUMER_SECRET')
+MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE')
+MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
+MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL')
+MPESA_API_URL = os.getenv('MPESA_API_URL')
+MPESA_AUTH_URL = os.getenv('MPESA_AUTH_URL')
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

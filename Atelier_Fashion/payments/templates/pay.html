@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+   
+
+  .checkout-container {
+    max-width: 500px;
+    margin: 100px auto;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 20px;
+    
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    text-align: center;
+    animation: fadeIn 1.2s ease;
+  }
+
+  .checkout-container h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  .checkout-container p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: #555;
+  }
+
+  .checkout-container input[type="text"] {
+    padding: 12px;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+  }
+
+  .checkout-container input[type="text"]:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+
+  .checkout-container button {
+    background: #007bff;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+
+  .checkout-container button:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+  }
+
+  #loading-animation {
+    display: none;
+    margin-top: 30px;
+  }
+
+  .lds-dual-ring {
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+  }
+  .lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 46px;
+    height: 46px;
+    margin: 1px;
+    border-radius: 50%;
+    border: 5px solid #007bff;
+    border-color: #007bff transparent #007bff transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+  }
+
+  @keyframes lds-dual-ring {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<div class="checkout-container">
+  <h2>Checkout</h2>
+  <p>Total Amount: <strong>Ksh {{ total }}</strong></p>
+
+  <form method="post" action="{% url 'initiate_payment' %}" id="payment-form">
+    {% csrf_token %}
+    <label for="phone">Enter M-Pesa Phone Number:</label><br>
+    <input type="text" name="phone" id="phone" placeholder="e.g. 2547XXXXXXXX" required>
+    <button type="submit">Pay Ksh {{ total }}</button>
+  </form>
+
+  <div id="loading-animation">
+    <p>Please complete the payment on your phone...</p>
+    <div class="lds-dual-ring"></div>
+  </div>
+</div>
+
+<script>
+document.getElementById('payment-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const phone = form.phone.value;
+  const loading = document.getElementById('loading-animation');
+
+  // Show animation
+  loading.style.display = 'block';
+
+  fetch(form.action, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: `phone=${encodeURIComponent(phone)}`
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("STK push sent. Check your phone and complete payment.");
+      // Optionally poll the server here to check payment status
+    } else {
+      loading.style.display = 'none';
+      alert("Payment initiation failed. Please try again.");
+    }
+  })
+  .catch(() => {
+    loading.style.display = 'none';
+    alert("Something went wrong. Try again later.");
+  });
+});
+</script>
+
+{% endblock %}
