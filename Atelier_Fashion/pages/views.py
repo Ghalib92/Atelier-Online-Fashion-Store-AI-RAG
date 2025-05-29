@@ -28,23 +28,24 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from .models import Cart, CartItem, ProductCategory 
+from django.db.models import Sum
 
 @login_required
 def add_to_cart(request, product_id):
-    product = get_object_or_404(ProductCategory, id=product_id)
-    
-    # Get or create cart
     cart, created = Cart.objects.get_or_create(user=request.user)
-    
-    # Get or create cart item
+    product = get_object_or_404(ProductCategory, id=product_id)
+    quantity = int(request.GET.get('quantity', 1))
+
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-
     if not created:
-        # If item already exists in cart, increase quantity
-        cart_item.quantity += 1
-        cart_item.save()
+        cart_item.quantity += quantity
+    else:
+        cart_item.quantity = quantity
+    cart_item.save()
 
-    return redirect('view_cart')  # Name of the cart page URL
+    cart_count = cart.items.aggregate(total=Sum('quantity'))['total'] or 0
+
+    return JsonResponse({'success': True, 'cart_count': cart_count})
 @login_required
 def view_cart(request):
     cart = Cart.objects.filter(user=request.user).first()

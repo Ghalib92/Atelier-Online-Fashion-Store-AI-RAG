@@ -294,10 +294,8 @@
         </div>
 
         <!-- Add to Cart Submit Button -->
-        <button type="submit" class="btn btn-primary-custom w-100">
-            <i class="fas fa-shopping-cart me-2"></i> Add to Cart
-        </button>
-    </form>
+        <button class="add-to-cart" data-product-id="{{ product.id }}">Add to Cart</button>
+
 </div>
 
                     <button class="btn btn-outline-dark w-100 mb-2 animate__animated animate__heartBeat animate__repeat-2">
@@ -326,9 +324,26 @@
 <!-- Your existing product detail template content -->
 
 <!-- Add this right before </body> -->
-<script>
+ <script>
+document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', function () {
+        const productId = this.getAttribute('data-product-id');
+        const quantityInput = document.getElementById(`qty-input-${productId}`);
+        const quantity = parseInt(quantityInput.value);
 
+        fetch(`/add-to-cart/${productId}/?quantity=${quantity}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.cart_count !== undefined) {
+                    document.getElementById('cart-count').innerText = data.cart_count;
+                }
+            });
+    });
+});
 </script>
+
+
+
  
 <script src="{% static 'JS/main.js' %}"></script>
 {%endblock%}
