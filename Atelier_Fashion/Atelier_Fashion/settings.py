@@ -99,7 +99,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',  # Required for admin
                 'django.contrib.messages.context_processors.messages',  # Required for admin
-                'pages.context_processors.cart_context',  # Your cart processor
+                'pages.context_processors.cart_count',  # Your cart processor
             ],
         },
     },

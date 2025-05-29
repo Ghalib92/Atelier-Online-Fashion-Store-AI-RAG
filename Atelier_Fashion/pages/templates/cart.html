@@ -1,36 +1,21 @@
+<!-- templates/pages/cart.html -->
+
 {% extends 'base.html' %}
-{% block title %}Your Cart{% endblock %}
 {% block content %}
-<div class="container py-5">
-    <h2>Your Cart</h2>
-    {% if cart %}
-        <table class="table table-bordered mt-4">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Qty</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for key, item in cart.items %}
-                <tr>
-                    <td>
-                        <img src="{{ item.image }}" width="60" style="margin-right: 10px;"> 
-                        {{ item.title }}
-                    </td>
-                    <td>{{ item.quantity }}</td>
-                    <td>Ksh {{ item.price }}</td>
-                    <td><strong>Ksh {{ item.total }}</strong></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <h4 class="mt-4">Total: <span style="color:#7e0564;">Ksh {{ total }}</span></h4>
-        <a href="#" class="btn btn-primary mt-3">Proceed to Checkout</a>
-    {% else %}
-        <p>Your cart is empty.</p>
-    {% endif %}
-</div>
+<h2>Your Cart</h2>
+
+{% if cart and cart.items.all %}
+  <ul>
+ {% for item in cart.items.all %}
+  <li>
+    {{ item.product.name }} - Quantity: {{ item.quantity }} - Total: {{ item.total_price }}
+  </li>
+{% endfor %}
+</ul>
+<p><strong>Total Price:</strong> Ksh {{ cart.total_price }}</p>
+
+{% else %}
+  <p>Your cart is empty.</p>
+{% endif %}
+
 {% endblock %}
