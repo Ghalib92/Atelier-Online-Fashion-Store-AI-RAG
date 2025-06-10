@@ -407,7 +407,12 @@
                       </button>
                     </a>                </div>
             </div>
-                    <p class="card-text text-muted small mb-3">{{ product.description|truncatewords:15 }}</p>
+
+
+                     <p class="card-text text-muted small mb-3"><b>{{ product.name }}</b></p>
+                     <p class="card-text text-muted small mb-3"><b>Ksh.{{ product.price}}</b></p>
+                     <p class="card-text text-muted small mb-3">{{ product.description|truncatewords:15 }}</p>
+                    
                     
                     <div class="product-meta d-flex flex-wrap">
                         <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">

@@ -66,34 +66,12 @@ class ProductCategory (models.Model):
     quantity = models.PositiveIntegerField(default=0)
 
     category_options = [
-       ('work_wear','Work wear'),
-        ('graduation','Graduation'),
-        ('party', 'Party'),
-        ('mini_dresses', 'Mini Dress'),
-        ('maxi_dress', 'Maxi Dress'),
-        ('knee_lenth_dress', 'Knee Length Dress'),
-        ('crop_tops','Crop Tops'),
-        ('bodysuits','BodySuits'),
-        ('blouses','Blouses'),
-        ('wrap_tops','Wrap Tops'),
-        ('corsets','Corsets'),
-        ('pants','Pants'),
-        ('pants_sets','Pants Sets'),
-        ('shorts', 'Shorts'),
-        ('jackets', 'Jackets'),
-        ('kimonos','Kimonos'),
-        ('shawls','Shawls'),
-        ('Cardigans','Cardigans'),
-        ('jewelry','Jewelry'),
-        ('belts','Belts'),
-        ('sandals','Sandals')
-
-
-
-
-
-
-
+       
+      ('dresses','Dresses'),
+      ('pants_sets','Pants Sets'),
+      ('skirts','Skirts'),
+      ('tops','Tops'),
+      
     ]
     category = models.CharField( choices=category_options, default= 'occassion')
     # Optional image field for product photos

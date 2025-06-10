@@ -3,3 +3,13 @@ requests
 psycopg2
 pillow
 django-jazzmin
+sentence-transformers
+langchain
+pypdf
+python-dotenv
+pinecone-client[grpc]
+langchain-pinecone
+langchain-community
+langchain-openai
+langchain-experimental
+-e.
