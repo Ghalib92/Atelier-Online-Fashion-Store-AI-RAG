@@ -188,60 +188,82 @@
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
   <ul class="navbar-nav mx-auto">
 
-    <!-- Home -->
+<!-- Home -->
 <li class="nav-item">
-  <a class="nav-link active" href="{% url 'home' %}">
+  <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
     <i class="fas fa-home me-1"></i> Home
   </a>
 </li>
 
 <!-- Dresses -->
 <li class="nav-item">
-  <a class="nav-link" href="{% url 'category_view' 'dresses' %}">
+  <a class="nav-link {% if 'dresses' in request.path %}active{% endif %}" href="{% url 'category_view' 'dresses' %}">
     <i class="fas fa-venus me-1"></i> Dresses
   </a>
 </li>
 
 <!-- Pant Sets -->
 <li class="nav-item">
-  <a class="nav-link" href="{% url 'category_view' 'pants_sets' %}">
+  <a class="nav-link {% if 'pants_sets' in request.path %}active{% endif %}" href="{% url 'category_view' 'pants_sets' %}">
     <i class="fas fa-vest me-1"></i> Pant Sets
   </a>
 </li>
 
 <!-- Skirts -->
 <li class="nav-item">
-  <a class="nav-link" href="{% url 'category_view' 'skirts' %}">
+  <a class="nav-link {% if 'skirts' in request.path %}active{% endif %}" href="{% url 'category_view' 'skirts' %}">
     <i class="fas fa-female me-1"></i> Skirts
   </a>
 </li>
 
 <!-- Tops -->
 <li class="nav-item">
-  <a class="nav-link" href="{% url 'category_view' 'tops' %}">
+  <a class="nav-link {% if 'tops' in request.path %}active{% endif %}" href="{% url 'category_view' 'tops' %}">
     <i class="fas fa-tshirt me-1"></i> Tops
   </a>
 </li>
 
-    </div>
- <a href="{% url 'view_cart' %}" class="nav-link">
+<!-- AI Assistant -->
+<li class="nav-item">
+  <a class="nav-link {% if 'chatbot' in request.path %}active{% endif %}" href="{% url 'chatbot-page' %}">
+    <i class="fas fa-robot me-1"></i> AI Assistant
+  </a>
+</li>
+
+<!-- Cart -->
+<li class="nav-item">
+  <a class="nav-link {% if 'cart' in request.path %}active{% endif %}" href="{% url 'view_cart' %}">
     <i class="fas fa-shopping-cart"></i>
     <span id="cart-count" class="badge bg-danger">
       {{ cart_items_count }}
     </span>
-</a>
+  </a>
+</li>
 
- <a  class="nav-link" href="chatbot/chatbot-page/">AI assistant</a>
-
+<!-- Authentication -->
 {% if user.is_authenticated %}
-  <p>Welcome, {{ user.username }} | <a class="nav-link" href="{% url 'logout' %}">Logout</a></p>
+  <li class="nav-item">
+    <span class="nav-link text-light">Welcome, {{ user.username }}</span>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if 'logout' in request.path %}active{% endif %}" href="{% url 'logout' %}">
+      <i class="fas fa-sign-out-alt me-1"></i> Logout
+    </a>
+  </li>
 {% else %}
-  <a class="nav-link" href="{% url 'login' %}">Login</a>
-  <a class="nav-link" href="{% url 'signup' %}">signup</a>
+  <li class="nav-item">
+    <a class="nav-link {% if 'login' in request.path %}active{% endif %}" href="{% url 'login' %}">
+      <i class="fas fa-sign-in-alt me-1"></i> Login
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if 'signup' in request.path %}active{% endif %}" href="{% url 'signup' %}">
+      <i class="fas fa-user-plus me-1"></i> Signup
+    </a>
+  </li>
 {% endif %}
 
 
- 
   </nav>
 
 
