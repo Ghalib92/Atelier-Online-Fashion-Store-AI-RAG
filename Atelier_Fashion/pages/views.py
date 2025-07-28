@@ -6,7 +6,10 @@ from .models import Product,ProductCategory
 
 def home (request):
      products = ProductCategory.objects.all().order_by('-created_at')
-     return render(request, 'index.html', {'products': products})
+     latest = ProductCategory.objects.all().order_by('-created_at')[:8]
+
+
+     return render(request, 'index.html', {'products': products, 'latest': latest})
 
 
 

@@ -2,13 +2,20 @@
 {% load static %}
 {% block title %} Home {% endblock %}
 
+ 
 {% block content %}
+
 <style>
-     .hero-section {
+     
+   
+ 
+    .hero-section {
         background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
                     url("{% static 'media/home.jpg' %}") center/cover no-repeat;
+                    
         height: 100vh;
         min-height: 800px;
+         
         width: 100%;
         position: relative;
         display: flex;
@@ -470,13 +477,103 @@
 </style>
 
 <main>
-     <div class="hero-section">
+     <div class="container-fluid hero-section">
         <div class="home-text">
             <h1>Atelier <span> custom Couture</span></h1>
             <h5>The Art of You.</h5>
              
         </div>
     </div>
+
+
+
+
+
+
+
+<div class="container">
+
+
+    <h2 class="text-center mb-5 display-4 fw-bold mt-3" style="font-family: 'Playfair Display', serif; color: #7e0564;">Latest Products</h2>
+    <p class="text-center mb-5" style="font-family: 'Montserrat', sans-serif; font-size: 1.2rem; color: #555;">
+        Discover our latest arrivals and stay ahead in fashion.
+    </p>
+
+</div>
+
+
+
+
+
+<div class="row g-4">
+        {% for product in latest %}
+<!-- Updated Product Card Structure -->
+<div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+    <div class="product-card-wrapper h-100">
+        <div class="card h-100 border-0 shadow-sm">
+            <!-- Product Image -->
+            <div class="position-relative" style="height: 300px; overflow: hidden;">
+                <img src="{{ product.image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ product.name }}">
+                
+             <div class="product-badge position-absolute top-0 end-0 m-3 bg-{{ product.get_availability_class }} text-white rounded-pill px-3 py-1 small">
+                        {{ product.get_availability_display }}
+                    </div>
+                <!-- Action Buttons -->
+                <div class="product-actions position-absolute bottom-0 start-0 end-0 bg-white p-2 d-flex justify-content-center"
+                     style="opacity: 0; transform: translateY(100%); transition: all 0.3s ease;">
+                    <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill"><i class="fas fa-heart"></i></button>
+
+                 <div class="d-flex gap-3 mb-4 align-items-center animate__animated animate__pulse animate__infinite">
+    <form method="POST" action="{% url 'add_to_cart' product.id %}" class="add-to-cart-form w-100" data-product-id="{{ product.id }}">
+        {% csrf_token %}
+        <div class="input-group mb-3" style="max-width: 130px;">
+           <button type="submit" class="btn btn-primary-custom w-100">
+            <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+        </button> 
+        </div>
+
+        
+    </form>
+</div>
+     
+                    <a href="{% url 'product_detail' product.id %}">
+                      <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill">
+                           <i class="fas fa-eye"></i>
+                      </button>
+                    </a>                </div>
+            </div>
+                   
+                     <p class="card-text text-muted small mb-3"><b>{{ product.name }}</b></p>
+                     <p class="card-text text-muted small mb-3"><b>Ksh.{{ product.price}}</b></p>
+                     <p class="card-text text-muted small mb-3">{{ product.description|truncatewords:15 }}</p> 
+                    <div class="product-meta d-flex flex-wrap">
+                        <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
+                            <i class="fas fa-ruler me-1"></i>{{ product.get_size_display }}
+                        </span>
+                        <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
+                            <i class="fas fa-palette me-1"></i>{{ product.color }}
+                        </span>
+                        <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
+                            <i class="fas fa-box-open me-1"></i>{{ product.quantity }} left
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="empty-state">
+                <i class="fas fa-tshirt fa-4x mb-4" style="color: #7e0564;"></i>
+                <h3 class="mb-3">Our Collection is Coming Soon</h3>
+                <p class="text-muted">We're preparing something special for you!</p>
+                <button class="btn btn-outline-dark rounded-pill px-4">Notify Me</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
 
 
  
@@ -574,6 +671,16 @@
         {% endfor %}
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
