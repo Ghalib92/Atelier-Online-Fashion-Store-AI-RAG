@@ -366,6 +366,67 @@
   </form>
 </div>
 
+
+<div class="container-fluid my-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <form method="get">
+        <div class="row g-3 align-items-end">
+          <!-- Size -->
+          <div class="col-md-3 col-sm-6">
+            <label for="size" class="form-label fw-semibold">Size</label>
+            <select name="size" id="size" class="form-select">
+              <option value="">All</option>
+              <option value="XS" {% if selected_size == 'XS' %}selected{% endif %}>XS</option>
+              <option value="S" {% if selected_size == 'S' %}selected{% endif %}>S</option>
+              <option value="M" {% if selected_size == 'M' %}selected{% endif %}>M</option>
+              <option value="L" {% if selected_size == 'L' %}selected{% endif %}>L</option>
+              <option value="XL" {% if selected_size == 'XL' %}selected{% endif %}>XL</option>
+            </select>
+          </div>
+
+          <!-- Color -->
+          <div class="col-md-3 col-sm-6">
+            <label for="color" class="form-label fw-semibold">Color</label>
+            <input type="text" name="color" id="color" class="form-control" placeholder="e.g. Red" value="{{ selected_color }}">
+          </div>
+
+          <!-- Price Min -->
+          <div class="col-md-3 col-sm-6">
+            <label for="price_min" class="form-label fw-semibold">Price Min (KES)</label>
+            <input type="number" step="0.01" name="price_min" id="price_min" class="form-control" value="{{ price_min }}">
+          </div>
+
+          <!-- Price Max -->
+          <div class="col-md-3 col-sm-6">
+            <label for="price_max" class="form-label fw-semibold">Price Max (KES)</label>
+            <input type="number" step="0.01" name="price_max" id="price_max" class="form-control" value="{{ price_max }}">
+          </div>
+
+          <!-- Sort By -->
+          <div class="col-md-3 col-sm-6">
+            <label for="sort" class="form-label fw-semibold">Sort By</label>
+            <select name="sort" id="sort" class="form-select">
+              <option value="">Default</option>
+              <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+              <option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+              <option value="latest" {% if selected_sort == 'latest' %}selected{% endif %}>Newest First</option>
+              <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+            </select>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="col-md-3 col-sm-6 d-grid mt-2">
+            <button type="submit" class="btn btn-primary fw-semibold">Apply Filters</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
  <div class="container-fluid px-4 py-5">
           
 

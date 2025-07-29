@@ -15,14 +15,63 @@ def home (request):
 
 def category_view(request, category_name):
     products = ProductCategory.objects.filter(category=category_name)
+
+    # Filters
+    size = request.GET.get('size', '').strip()
+    color = request.GET.get('color', '').strip()
+    price_min = request.GET.get('price_min', '').strip()
+    price_max = request.GET.get('price_max', '').strip()
+    sort = request.GET.get('sort', '').strip()
+
+    if size:
+        products = products.filter(size=size)
+    if color:
+        products = products.filter(color__iexact=color)
+    if price_min and price_min.isdigit():
+        products = products.filter(price__gte=price_min)
+    if price_max and price_max.isdigit():
+        products = products.filter(price__lte=price_max)
+
+    # Safe sorting options
+    sort_options = {
+        'price_desc': '-price',
+        'price_asc': 'price',
+        'latest': '-created_at',
+        'oldest': 'created_at',
+    }
+    if sort in sort_options:
+        products = products.order_by(sort_options[sort])
+
     return render(request, 'products.html', {
         'products': products,
-        'category': category_name.replace('_', ' ').title()  # For display
+        'category': category_name.replace('_', ' ').title(),
+        'selected_size': size,
+        'selected_color': color,
+        'price_min': price_min,
+        'price_max': price_max,
+        'selected_sort': sort,
     })
 
+
+
 def product_detail(request, id):
-    product = get_object_or_404(ProductCategory, id=id)  # using 'id' instead of 'pk'
-    return render(request, 'product_details.html', {'product': product})
+    product = get_object_or_404(ProductCategory, id=id)
+
+    # Suggest similar products
+    recommendations = ProductCategory.objects.filter(
+        category=product.category
+    ).exclude(id=product.id)
+
+    # Filter similar ones by color or size
+    similar_products = recommendations.filter(
+        models.Q(color__iexact=product.color) |
+        models.Q(size=product.size)
+    )[:4]  # limit to 4 suggestions
+
+    return render(request, 'product_details.html', {
+        'product': product,
+        'similar_products': similar_products
+    })
 
 
 from decimal import Decimal
