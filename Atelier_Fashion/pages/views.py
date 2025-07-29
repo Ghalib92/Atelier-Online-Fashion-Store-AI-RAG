@@ -1,5 +1,7 @@
 from django.shortcuts import render,get_object_or_404, redirect
 from .models import Product,ProductCategory
+from django.db.models import Q
+
 
 # Create your views here.
 
@@ -7,6 +9,7 @@ from .models import Product,ProductCategory
 def home (request):
      products = ProductCategory.objects.all().order_by('-created_at')
      latest = ProductCategory.objects.all().order_by('-created_at')[:8]
+
 
 
      return render(request, 'index.html', {'products': products, 'latest': latest})
@@ -64,9 +67,10 @@ def product_detail(request, id):
 
     # Filter similar ones by color or size
     similar_products = recommendations.filter(
-        models.Q(color__iexact=product.color) |
-        models.Q(size=product.size)
-    )[:4]  # limit to 4 suggestions
+    Q(color__iexact=product.color) |
+    Q(size=product.size)
+    )[:8]
+  # limit to 4 suggestions
 
     return render(request, 'product_details.html', {
         'product': product,
