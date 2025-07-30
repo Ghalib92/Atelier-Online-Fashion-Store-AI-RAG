@@ -1,6 +1,19 @@
-<h2>Order Successful</h2>
-<p>Thank you {{ order.full_name }}!</p>
-<p>Order Total: Ksh.{{ order.total_amount }}</p>
-<p>Delivery Address: {{ order.address }}</p>
-<p>We will contact you shortly to confirm your order.</p>
-<p>Order ID: {{ order.id }}</p>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center p-4 bg-light shadow rounded">
+    <h2 class="text-success mb-3">🎉 Order Successful!</h2>
+
+    <p class="fs-5">Thank you, <strong>{{ order.full_name }}</strong>!</p>
+    <p class="fs-5">Order Total: <strong>Ksh.{{ order.total_amount }}</strong></p>
+    <p>Delivery Address: <em>{{ order.address }}</em></p>
+    <p class="text-muted">We will contact you shortly to confirm your order.</p>
+    <p class="mb-4">Order ID: <code>#{{ order.id }}</code></p>
+
+    <a href="{% url 'order_list' %}" class="btn btn-primary btn-lg mt-3">
+      View My Orders
+    </a>
+  </div>
+</div>
+{% endblock %}

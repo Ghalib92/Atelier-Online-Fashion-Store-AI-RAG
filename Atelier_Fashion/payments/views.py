@@ -10,6 +10,8 @@ from pages.models import Cart  # Adjust based on your actual cart model
 from .models import PaymentTransaction
 from django.contrib.auth.decorators import login_required
 from .mpesa import lipa_na_mpesa
+from pages.models import Order
+
 
 @login_required
 def payment_page(request):
@@ -81,3 +83,11 @@ def mpesa_callback(request):
 
 def payment_success(request):
     return render(request, 'success.html')
+
+
+
+@login_required
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'my_orders.html', {'orders': orders})
+

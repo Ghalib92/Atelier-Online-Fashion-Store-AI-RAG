@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <h3>My Orders</h3>
+  {% for order in orders %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5>Order #{{ order.id }} | Ksh.{{ order.total_amount }}</h5>
+        <p>Status: <strong>
+          {{ order.statuses.last.get_status_display }}
+        </strong></p>
+        <p>Placed: {{ order.created_at|date:"D, M d Y h:i A" }}</p>
+      </div>
+    </div>
+  {% empty %}
+    <p>You have no orders yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

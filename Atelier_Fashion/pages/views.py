@@ -216,6 +216,9 @@ def checkout_view(request):
                 paid=False
             )
 
+            # ✅ Clear the cart
+            cart.items.all().delete()
+
             send_mail(
                 'Order Confirmation',
                 f'Thank you {full_name}, your order has been received. Delivery to:\n{address}\nAmount: Ksh.{total}',
@@ -224,8 +227,7 @@ def checkout_view(request):
                 fail_silently=False
             )
 
-            return render(request, 'order_success.html', {'order': order})
-
+            return redirect('order_list')
         elif payment_method == 'mpesa':
             request.session['checkout_data'] = {
                 'full_name': full_name,
@@ -237,4 +239,10 @@ def checkout_view(request):
             return redirect('payment_page')
 
     return render(request, 'checkout.html', {'total': total})
+
+@login_required
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'my_orders.html', {'orders': orders})
+
 
