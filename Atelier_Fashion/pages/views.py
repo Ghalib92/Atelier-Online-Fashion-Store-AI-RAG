@@ -86,6 +86,10 @@ from django.contrib.auth.decorators import login_required
 from .models import Cart, CartItem, ProductCategory 
 from django.db.models import Sum
 
+
+
+
+
 @login_required
 def add_to_cart(request, product_id):
     cart, created = Cart.objects.get_or_create(user=request.user)
@@ -176,3 +180,61 @@ def product_search(request):
         'query': query,
         'results': results
     })
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from .models import Order, Cart
+from django.conf import settings
+
+@login_required
+def checkout_view(request):
+    cart = Cart.objects.filter(user=request.user).first()
+    if not cart or cart.items.count() == 0:
+        return render(request, 'checkout.html', {'error': 'Cart is empty'})
+
+    total = cart.total_price
+
+    if request.method == 'POST':
+        full_name = request.POST['full_name']
+        email = request.POST['email']
+        phone = request.POST['phone']
+        address = request.POST['address']
+        payment_method = request.POST['payment_method']
+
+        if payment_method == 'cod':
+            total += 200
+
+            order = Order.objects.create(
+                user=request.user,
+                full_name=full_name,
+                email=email,
+                phone=phone,
+                address=address,
+                payment_method='cod',
+                total_amount=total,
+                paid=False
+            )
+
+            send_mail(
+                'Order Confirmation',
+                f'Thank you {full_name}, your order has been received. Delivery to:\n{address}\nAmount: Ksh.{total}',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False
+            )
+
+            return render(request, 'order_success.html', {'order': order})
+
+        elif payment_method == 'mpesa':
+            request.session['checkout_data'] = {
+                'full_name': full_name,
+                'email': email,
+                'phone': phone,
+                'address': address,
+                'total': str(total)
+            }
+            return redirect('payment_page')
+
+    return render(request, 'checkout.html', {'total': total})
+

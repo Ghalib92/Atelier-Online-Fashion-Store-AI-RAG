@@ -12,6 +12,7 @@ path('cart/', views.view_cart, name='view_cart'),
 path('cart/update/', views.update_cart_quantity, name='update_cart_quantity'),
 path('cart/remove/', views.remove_cart_item, name='remove_cart_item'),
 path('search/', views.product_search, name='product_search'),
+path('checkout/', views.checkout_view, name='checkout'),
 
 
 ]

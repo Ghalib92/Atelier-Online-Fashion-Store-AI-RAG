@@ -95,7 +95,7 @@
   <h2>Checkout</h2>
   <p>Total Amount: <strong>Ksh {{ total }}</strong></p>
 
-  <form method="post" action="{% url 'initiate_payment' %}" id="payment-form">
+  <form method="post" action="{% url 'payment_page' %}" id="payment-form">
     {% csrf_token %}
     <label for="phone">Enter M-Pesa Phone Number:</label><br>
     <input type="text" name="phone" id="phone" placeholder="e.g. 2547XXXXXXXX" required>

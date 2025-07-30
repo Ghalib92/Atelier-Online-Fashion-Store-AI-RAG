@@ -23,7 +23,8 @@ MPESA_CONSUMER_SECRET = os.getenv('MPESA_CONSUMER_SECRET')
 MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE')
 MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
 MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL')
-MPESA_API_URL = os.getenv('MPESA_API_URL')
+MPESA_STK_PUSH_URL = os.getenv('MPESA_API_URL')
+
 MPESA_AUTH_URL = os.getenv('MPESA_AUTH_URL')
 
 
@@ -87,6 +88,13 @@ JAZZMIN_SETTINGS = {
     "show_ui_builder": False,
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'alphaastudios92@gmail.com'
+EMAIL_HOST_PASSWORD = 'REDACTED-EMAIL-APP-PASSWORD'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 
