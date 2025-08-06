@@ -13,16 +13,48 @@
 <section class="product-hero">
     <div class="container-fluid product-container">
         <div class="row">
-            <div class="col-lg-6">
-                <div class="product-gallery">
-                    <img src="{{ product.image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ product.title }}">
-                    <div class="thumbnail-container">
-                        {% for image in products %}
-                            <img src="{{ product.image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ product.title }}">
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+           <div class="col-lg-6">
+    <div class="product-gallery">
+        <!-- Main image -->
+        <img id="mainImage" src="{{ product.image.url }}" class="img-fluid w-100 object-fit-cover zoom-hover" alt="{{ product.name }}">
+
+        <!-- Thumbnails -->
+        <div class="d-flex gap-2 mt-3">
+            {% if product.image_main %} 
+                <img onclick="swapImage('{{ product.image.url }}')" src="{{ product.image.url }}" class="img-thumbnail thumb">
+            {% endif %}
+            {% if product.image_2 %}
+                <img onclick="swapImage('{{ product.image_2.url }}')" src="{{ product.image_2.url }}" class="img-thumbnail thumb">
+            {% endif %}
+            {% if product.image_3 %}
+                <img onclick="swapImage('{{ product.image_3.url }}')" src="{{ product.image_3.url }}" class="img-thumbnail thumb">
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.zoom-hover {
+    transition: transform 0.3s ease;
+}
+.zoom-hover:hover {
+    transform: scale(1.1);
+    cursor: zoom-in;
+}
+.thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+}
+</style>
+
+<script>
+function swapImage(url) {
+    document.getElementById('mainImage').src = url;
+}
+</script>
+
             <div class="col-lg-6 animate__animated animate__fadeInRight">
                 <div class="product-details">
                     <h1 class="product-title">
@@ -148,6 +180,9 @@ document.querySelectorAll('.add-to-cart').forEach(button => {
             });
     });
 });
+function swapImage(url) {
+    document.getElementById('mainImage').src = url;
+}
 </script>
 <style>
     /* ===== Ultra Premium Base Styles ===== */
@@ -551,6 +586,19 @@ document.querySelectorAll('.add-to-cart').forEach(button => {
         gap: 1rem;
       }
     }
+    .zoom-hover {
+    transition: transform 0.3s ease;
+}
+.zoom-hover:hover {
+    transform: scale(1.1);
+    cursor: zoom-in;
+}
+.thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+}
 </style>
 <script src="{% static 'JS/main.js' %}"></script>
 {% endblock %}

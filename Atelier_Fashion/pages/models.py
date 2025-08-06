@@ -76,7 +76,10 @@ class ProductCategory (models.Model):
     category = models.CharField( choices=category_options, default= 'occassion')
     # Optional image field for product photos
     image = models.ImageField(upload_to='products/', blank=True, null=True)
+    image_2 = models.ImageField(upload_to='products/', blank=True, null=True)
+    image_3 = models.ImageField(upload_to='products/', blank=True, null=True)
     
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
