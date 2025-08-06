@@ -671,19 +671,44 @@ function swapImage(url) {
  
 <script src="{% static 'JS/main.js' %}"></script>
 <!-- Modal -->
+
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content bg-dark">
+    <div class="modal-content bg-dark text-white">
       <div class="modal-body p-0">
-        <img id="modalImage" src="{{ product.image.url }}" class="img-fluid w-100 rounded" alt="{{ product.name }}">
-
+        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            {% if product.image %}
+            <div class="carousel-item active">
+              <img src="{{ product.image.url }}" class="d-block w-100" alt="Image 1">
+            </div>
+            {% endif %}
+            {% if product.image_2 %}
+            <div class="carousel-item">
+              <img src="{{ product.image_2.url }}" class="d-block w-100" alt="Image 2">
+            </div>
+            {% endif %}
+            {% if product.image_3 %}
+            <div class="carousel-item">
+              <img src="{{ product.image_3.url }}" class="d-block w-100" alt="Image 3">
+            </div>
+            {% endif %}
+          </div>
+          <!-- Controls -->
+          <button class="carousel-control-prev " type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon bg-danger"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon bg-danger"></span>
+          </button>
+        </div>
       </div>
+
       <div class="modal-footer justify-content-center">
-        <button type="button" class="btn bg-light btn-outline-primary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
-
 
 {% endblock %}
