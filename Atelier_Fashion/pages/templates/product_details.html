@@ -19,19 +19,19 @@
       <div class="col-lg-6 d-flex flex-column justify-content-start">
         <!-- Main Image with Zoom and Modal -->
         <div class="mb-4">
-          <img id="mainImage" src="{{ product.image.url }}" class="img-fluid w-100 border rounded zoom-image" alt="{{ product.name }}" style="max-height: 500px; object-fit: cover; cursor: zoom-in;" data-bs-toggle="modal" data-bs-target="#imageModal">
+          <img id="mainImage" src="{{ product.image.url }}" class="img-fluid w-100 border rounded zoom-image" alt="{{ product.name }}" style="max-height: 700px; object-fit: cover; cursor: zoom-in;" data-bs-toggle="modal" data-bs-target="#imageModal">
         </div>
 
         <!-- Thumbnails -->
         <div class="d-flex gap-2">
           {% if product.image %}
-          <img src="{{ product.image.url }}" class="thumbnail border rounded" onclick="changeImage(this)" style="height: 80px; cursor: pointer;">
+          <img src="{{ product.image.url }}" class="thumbnail border rounded" onclick="changeImage(this)" style="height:120px; cursor: pointer;">
           {% endif %}
           {% if product.image_2 %}
-          <img src="{{ product.image_2.url }}" class="thumbnail border rounded" onclick="changeImage(this)" style="height: 80px; cursor: pointer;">
+          <img src="{{ product.image_2.url }}" class="thumbnail border rounded" onclick="changeImage(this)" style="height: 120px; cursor: pointer;">
           {% endif %}
           {% if product.image_3 %}
-          <img src="{{ product.image_3.url }}" class="thumbnail border rounded" onclick="changeImage(this)" style="height: 80px; cursor: pointer;">
+          <img src="{{ product.image_3.url }}" class="thumbnail border rounded" onclick="changeImage(this)" style="height: 120px; cursor: pointer;">
           {% endif %}
         </div>
       </div>
