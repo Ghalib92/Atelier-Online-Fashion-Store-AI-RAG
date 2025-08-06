@@ -8,46 +8,31 @@
 
 {% endblock %}
 
+
 {% block content %}
 <!-- Product Section -->
 <section class="product-hero">
     <div class="container-fluid product-container">
         <div class="row">
            <div class="col-lg-6">
-    <div class="product-gallery">
-        <!-- Main image -->
-        <img id="mainImage" src="{{ product.image.url }}" class="img-fluid w-100 object-fit-cover zoom-hover" alt="{{ product.name }}">
+   <div class="col-md-6">
+      <img id="mainImage" src="{{ product.image.url }}" class="image-preview mb-3" alt="{{ product.name }}">
 
-        <!-- Thumbnails -->
-        <div class="d-flex gap-2 mt-3">
-            {% if product.image_main %} 
-                <img onclick="swapImage('{{ product.image.url }}')" src="{{ product.image.url }}" class="img-thumbnail thumb">
-            {% endif %}
-            {% if product.image_2 %}
-                <img onclick="swapImage('{{ product.image_2.url }}')" src="{{ product.image_2.url }}" class="img-thumbnail thumb">
-            {% endif %}
-            {% if product.image_3 %}
-                <img onclick="swapImage('{{ product.image_3.url }}')" src="{{ product.image_3.url }}" class="img-thumbnail thumb">
-            {% endif %}
-        </div>
+      <div class="d-flex">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" class="thumbnail active" onclick="changeImage(this)">
+        {% endif %}
+        {% if product.image_2 %}
+        <img src="{{ product.image_2.url }}" class="thumbnail" onclick="changeImage(this)">
+        {% endif %}
+        {% if product.image_3 %}
+        <img src="{{ product.image_3.url }}" class="thumbnail" onclick="changeImage(this)">
+        {% endif %}
+      </div>
+    </div>
     </div>
 </div>
-
-<style>
-.zoom-hover {
-    transition: transform 0.3s ease;
-}
-.zoom-hover:hover {
-    transform: scale(1.1);
-    cursor: zoom-in;
-}
-.thumb {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    cursor: pointer;
-}
-</style>
+ 
 
 <script>
 function swapImage(url) {
@@ -90,41 +75,61 @@ function swapImage(url) {
                             </span>
                             <span class="meta-value ms-2">{{ product.stock }} in stock</span>
                         </div>
+
+<form class="add-to-cart-form" data-product-id="{{ product.id }}">
+  {% csrf_token %}
+  
+  <!-- Size selector -->
+  <label for="size">Select Size</label>
+  <select name="size" class="form-select" required>
+    {% for size in product.get_sizes %}
+      <option value="{{ size }}">{{ size }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Color selector -->
+  <label for="color">Select Color</label>
+  <select name="color" class="form-select" required>
+    {% for color in product.get_colors %}
+      <option value="{{ color }}">{{ color }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Quantity input -->
+  <div class="input-group my-3">
+    <button class="btn btn-outline-secondary qty-btn qty-decrement" type="button">
+      <i class="fas fa-minus"></i>
+    </button>
+
+    <input type="number" class="form-control text-center qty-input" name="quantity" value="1" min="1" max="{{ product.stock }}">
+
+    <button class="btn btn-outline-secondary qty-btn qty-increment" type="button">
+      <i class="fas fa-plus"></i>
+    </button>
+  </div>
+
+  <!-- Add to cart button -->
+  <button type="button" class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+    Add to Cart
+  </button>
+</form>
+
                     </div>
 
-                    <hr class="my-3">
-
-                    <div class="product-description mb-4">
-                        <p>{{ product.description }}</p>
-                    </div>
-
-                    <div class="d-flex gap-3 mb-4 align-items-center animate__animated animate__pulse animate__infinite">
-                        <form method="POST" action="{% url 'add_to_cart' product.id %}" class="add-to-cart-form w-100" data-product-id="{{ product.id }}">
-                            {% csrf_token %}
-                            <div class="input-group mb-3">
-                                <!-- Minus Button -->
-                                <button class="btn btn-outline-secondary qty-btn qty-decrement" type="button">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-
-                                <!-- Quantity Input -->
-                                <input type="number" id="qty-input-{{ product.id }}" name="quantity"
-                                       class="form-control text-center qty-input" value="1" min="1" max="{{ product.stock }}">
-
-                                <!-- Plus Button -->
-                                <button class="btn btn-outline-secondary qty-btn qty-increment" type="button">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-
-                            <!-- Add to Cart Submit Button -->
-                            <button class="add-to-cart" data-product-id="{{ product.id }}">Add to Cart</button>
-                        </form>
-                    </div>
-
-                    <button class="btn btn-outline-dark w-100 mb-2 animate__animated animate__heartBeat animate__repeat-2">
-                        <i class="fas fa-heart me-2 text-danger"></i> Add to Wishlist
-                    </button>
+                    {% if user.is_authenticated %}
+        <form id="wishlistForm" method="POST" action="{% url 'toggle_wishlist' product.id %}">
+          {% csrf_token %}
+          <button type="submit" class="wishlist-btn mt-2">
+            {% if is_favorited %}
+              ❤️ Remove from Wishlist
+            {% else %}
+              🤍 Add to Wishlist
+            {% endif %}
+          </button>
+        </form>
+      {% else %}
+        <p class="mt-2 text-muted">Login to add to wishlist ❤️</p>
+      {% endif %}
                 </div>
             </div>
         </div>
@@ -166,23 +171,70 @@ function swapImage(url) {
 
 <script>
 document.querySelectorAll('.add-to-cart').forEach(button => {
-    button.addEventListener('click', function () {
-        const productId = this.getAttribute('data-product-id');
-        const quantityInput = document.getElementById(`qty-input-${productId}`);
-        const quantity = parseInt(quantityInput.value);
+    button.addEventListener('click', function (e) {
+        e.preventDefault();
 
-        fetch(`/add-to-cart/${productId}/?quantity=${quantity}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.cart_count !== undefined) {
-                    document.getElementById('cart-count').innerText = data.cart_count;
-                }
-            });
+        const productId = this.getAttribute('data-product-id');
+        const form = this.closest('.add-to-cart-form');
+        const quantity = form.querySelector('.qty-input').value;
+        const size = form.querySelector('select[name="size"]').value;
+        const color = form.querySelector('select[name="color"]').value;
+
+        const csrftoken = getCookie('csrftoken');
+
+        fetch(`/add-to-cart/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                quantity: quantity,
+                size: size,
+                color: color
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.cart_count !== undefined) {
+                document.getElementById('cart-count').innerText = data.cart_count;
+                alert("Added to cart!");
+            } else {
+                alert("Error: " + (data.error || "Unable to add item."));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Something went wrong while adding to cart.");
+        });
     });
 });
+
+// CSRF token getter
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (const cookie of cookies) {
+            const trimmed = cookie.trim();
+            if (trimmed.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(trimmed.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 function swapImage(url) {
     document.getElementById('mainImage').src = url;
 }
+  function changeImage(elem) {
+    const mainImage = document.getElementById('mainImage');
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    mainImage.src = elem.src;
+    thumbnails.forEach(thumb => thumb.classList.remove('active'));
+    elem.classList.add('active');
+  }
 </script>
 <style>
     /* ===== Ultra Premium Base Styles ===== */
@@ -599,6 +651,48 @@ function swapImage(url) {
     object-fit: cover;
     cursor: pointer;
 }
+
+ .image-preview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: 0.3s;
+  }
+
+  .thumbnail {
+    max-width: 100px;
+    height: 100px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    margin-right: 8px;
+  }
+
+  .thumbnail:hover, .thumbnail.active {
+    border-color: #d4af37;
+  }
+
+  .wishlist-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #d4af37;
+    font-size: 20px;
+  }
+
+  .form-select, .form-control {
+    margin-bottom: 10px;
+  }
+
+  .product-meta {
+    margin-top: 10px;
+  }
+
+  .stock-status.in-stock { color: green; }
+  .stock-status.low-stock { color: orange; }
+  .stock-status.out-of-stock { color: red; }
 </style>
+ 
 <script src="{% static 'JS/main.js' %}"></script>
 {% endblock %}

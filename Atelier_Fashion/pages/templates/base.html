@@ -226,6 +226,12 @@
   </a>
 </li>
 
+
+<!-- Wishlist -->
+<li class="nav-item">
+  <a class="nav-link {% if 'wishlist' in request.path %}active{% endif %}" href="{% url 'wishlist' %}">
+    <i class="fas fa-heart me-1"></i> Wishlist
+  </a>
 <!-- AI Assistant -->
 <li class="nav-item">
   <a class="nav-link {% if 'chatbot' in request.path %}active{% endif %}" href="{% url 'chatbot-page' %}">

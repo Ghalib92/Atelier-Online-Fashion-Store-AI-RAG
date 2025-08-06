@@ -1,5 +1,5 @@
 from django.shortcuts import render,get_object_or_404, redirect
-from .models import Product,ProductCategory
+from .models import Product, ProductCategory, Wishlist
 from django.db.models import Q
 
 
@@ -71,10 +71,15 @@ def product_detail(request, id):
     Q(size=product.size)
     )[:8]
   # limit to 4 suggestions
+  # Wishlist check
+    is_favorited = False
+    if request.user.is_authenticated:
+        is_favorited = Wishlist.objects.filter(user=request.user, product=product).exists()
 
     return render(request, 'product_details.html', {
         'product': product,
-        'similar_products': similar_products
+        'similar_products': similar_products,
+        'is_favorited': is_favorited
     })
 
 
@@ -85,28 +90,47 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from .models import Cart, CartItem, ProductCategory 
 from django.db.models import Sum
+import json
+
+ 
 
 
 
 
 
 @login_required
+@require_POST
 def add_to_cart(request, product_id):
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    product = get_object_or_404(ProductCategory, id=product_id)
-    quantity = int(request.GET.get('quantity', 1))
+    try:
+        data = json.loads(request.body)
+        quantity = int(data.get('quantity', 1))
+        size = data.get('size')
+        color = data.get('color')
 
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-    if not created:
-        cart_item.quantity += quantity
-    else:
-        cart_item.quantity = quantity
-    cart_item.save()
+        product = get_object_or_404(ProductCategory, id=product_id)
+        cart, created = Cart.objects.get_or_create(user=request.user)
 
-    cart_count = cart.items.aggregate(total=Sum('quantity'))['total'] or 0
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+        )
 
-    return JsonResponse({'success': True, 'cart_count': cart_count})
-@login_required
+        if not created:
+            cart_item.quantity += quantity
+        else:
+            cart_item.quantity = quantity
+
+        # Optional: if you want to store size/color, add those fields to CartItem model
+        # cart_item.size = size
+        # cart_item.color = color
+
+        cart_item.save()
+
+        cart_count = cart.items.aggregate(total=Sum('quantity'))['total'] or 0
+        return JsonResponse({'success': True, 'cart_count': cart_count})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)@login_required
 def view_cart(request):
     cart = Cart.objects.filter(user=request.user).first()
     return render(request, 'cart.html', {'cart': cart})
@@ -246,3 +270,17 @@ def my_orders(request):
     return render(request, 'my_orders.html', {'orders': orders})
 
 
+
+
+@login_required
+def wishlist_view(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user).select_related('product')
+    return render(request, 'wishlist.html', {'wishlist_items': wishlist_items})
+
+@login_required
+def toggle_wishlist(request, id):
+    product = get_object_or_404(ProductCategory, id=id)
+    wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, product=product)
+    if not created:
+        wishlist_item.delete()
+    return redirect('product_detail', id=id)
