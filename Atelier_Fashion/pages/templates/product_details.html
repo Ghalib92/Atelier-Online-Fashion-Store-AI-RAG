@@ -670,4 +670,20 @@ function swapImage(url) {
 </style>
  
 <script src="{% static 'JS/main.js' %}"></script>
+<!-- Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark">
+      <div class="modal-body p-0">
+        <img id="modalImage" src="{{ product.image.url }}" class="img-fluid w-100 rounded" alt="{{ product.name }}">
+
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn bg-light btn-outline-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {% endblock %}
