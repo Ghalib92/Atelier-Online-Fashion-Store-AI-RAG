@@ -1,5 +1,6 @@
 from django.shortcuts import render,get_object_or_404, redirect
-from .models import Product, ProductCategory, Wishlist
+from .models import Product, ProductCategory, Wishlist, Order, Cart, CartItem, OrderItem
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
 
@@ -121,8 +122,8 @@ def add_to_cart(request, product_id):
             cart_item.quantity = quantity
 
         # Optional: if you want to store size/color, add those fields to CartItem model
-        # cart_item.size = size
-        # cart_item.color = color
+        cart_item.size = size
+        cart_item.color = color
 
         cart_item.save()
 
@@ -239,6 +240,14 @@ def checkout_view(request):
                 total_amount=total,
                 paid=False
             )
+            for item in cart.items.all():
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    size=item.size,
+                    color=item.color
+                )
 
             # ✅ Clear the cart
             cart.items.all().delete()

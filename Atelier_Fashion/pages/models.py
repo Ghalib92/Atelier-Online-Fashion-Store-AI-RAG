@@ -170,9 +170,17 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=10, choices=PAYMENT_CHOICES)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     paid = models.BooleanField(default=False)
-    selected_size = models.CharField(max_length=10, blank=True, null=True)
-    selected_color = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+    def items_summary(self):
+        return ", ".join(
+            [f"{item.quantity}x {item.product.name} ({item.size}/{item.color})"
+            for item in self.items.all()]
+        )
+    items_summary.short_description = 'Items Ordered'
+
 
 
     def __str__(self):
@@ -192,6 +200,23 @@ class OrderStatus(models.Model):
 
     def __str__(self):
         return f"{self.order} - {self.get_status_display()}"
+
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    size = models.CharField(max_length=20, blank=True, null=True)
+    color = models.CharField(max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name} ({self.size}/{self.color})"
+
+    @property
+    def total_price(self):
+        return self.product.price * self.quantity
+
 
 
 

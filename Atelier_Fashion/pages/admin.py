@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, ProductCategory, Order, Wishlist, OrderStatus
+from .models import Product, ProductCategory, Order, Wishlist, OrderStatus, OrderItem
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -25,9 +25,19 @@ class ProductCategoryAdmin(admin.ModelAdmin):
         }),
     )
 
+class OrderItemInline(admin.StackedInline):  # change from TabularInline
+    model = OrderItem
+    extra = 0
+    readonly_fields = ['product', 'quantity', 'size', 'color']
+    can_delete = False
+    show_change_link = False
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'full_name', 'total_amount', 'selected_size', 'selected_color', 'paid')
+    inlines = [OrderItemInline]
+    list_display = ['user', 'full_name', 'email', 'phone', 'total_amount', 'items_summary', 'created_at']
+
+    readonly_fields = ['user', 'full_name', 'email', 'phone', 'total_amount', 'created_at']
 
 @admin.register(Wishlist)
 class WishlistAdmin(admin.ModelAdmin):
