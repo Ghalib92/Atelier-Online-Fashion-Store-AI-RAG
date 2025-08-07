@@ -1,19 +1,237 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container py-4">
-  <h3>My Orders</h3>
-  {% for order in orders %}
-    <div class="card mb-3">
-      <div class="card-body">
-        <h5>Order #{{ order.id }} | Ksh.{{ order.total_amount }}</h5>
-        <p>Status: <strong>
-          {{ order.statuses.last.get_status_display }}
-        </strong></p>
-        <p>Placed: {{ order.created_at|date:"D, M d Y h:i A" }}</p>
+<style>
+  :root {
+    --primary: #9d075f;
+    --secondary: #A29BFE;
+    --accent: #FD79A8;
+    --dark: #2D3436;
+    --light: #F5F6FA;
+    --success: #00B894;
+    --warning: #FF7675;
+    --text-dark: #2D3436;
+    --text-light: #636E72;
+    --card-bg: #FFFFFF;
+    --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .orders-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .orders-header {
+    margin-bottom: 3rem;
+  }
+
+  .orders-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+  }
+
+  .orders-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    line-height: 1.6;
+    max-width: 800px;
+  }
+
+  .orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .order-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .order-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  }
+
+  .order-card-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    position: relative;
+  }
+
+  .order-id {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .order-amount {
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+
+  .order-card-body {
+    padding: 1.5rem;
+  }
+
+  .order-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .order-status {
+    background-color: rgba(0, 184, 148, 0.1);
+    color: var(--success);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .order-date {
+    color: var(--text-light);
+    font-size: 0.9rem;
+  }
+
+  .order-details-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+
+  .order-details-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+
+  .empty-orders {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .empty-icon {
+    font-size: 3.5rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-title {
+    font-size: 1.8rem;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+
+  .empty-text {
+    color: var(--text-light);
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    line-height: 1.6;
+  }
+
+  .shop-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  .shop-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+  }
+
+  @media (max-width: 1200px) {
+    .orders-grid {
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .orders-container {
+      padding: 1.5rem;
+    }
+    
+    .orders-title {
+      font-size: 2rem;
+    }
+    
+    .orders-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="orders-container">
+  <div class="orders-header">
+    <h1 class="orders-title">Your Orders</h1>
+    <p class="orders-subtitle">
+      Your purchases will arrive in 3-5 business days. We'll notify you when items ship.
+      All orders are delivered to your specified address.
+    </p>
+  </div>
+
+  <div class="orders-grid">
+    {% for order in orders %}
+      <div class="order-card">
+        <div class="order-card-header">
+          <div class="order-id">Order #{{ order.id }}</div>
+          <div class="order-amount">Ksh.{{ order.total_amount }}</div>
+        </div>
+        <div class="order-card-body">
+          <div class="order-meta">
+            <span class="order-status">{{ order.statuses.last.get_status_display }}</span>
+            <span class="order-date">{{ order.created_at|date:"M d, Y" }}</span>
+          </div>
+          <button class="order-details-btn">View Details</button>
+        </div>
       </div>
-    </div>
-  {% empty %}
-    <p>You have no orders yet.</p>
-  {% endfor %}
+    {% empty %}
+      <div class="empty-orders">
+        <div class="empty-icon">📦</div>
+        <h3 class="empty-title">No Orders Found</h3>
+        <p class="empty-text">
+          You haven't placed any orders yet. Browse our collection to find something you'll love.
+        </p>
+        <button class="shop-btn">Start Shopping</button>
+      </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

@@ -373,23 +373,7 @@
       <form method="get">
         <div class="row g-3 align-items-end">
           <!-- Size -->
-          <div class="col-md-3 col-sm-6">
-            <label for="size" class="form-label fw-semibold">Size</label>
-            <select name="size" id="size" class="form-select">
-              <option value="">All</option>
-              <option value="XS" {% if selected_size == 'XS' %}selected{% endif %}>XS</option>
-              <option value="S" {% if selected_size == 'S' %}selected{% endif %}>S</option>
-              <option value="M" {% if selected_size == 'M' %}selected{% endif %}>M</option>
-              <option value="L" {% if selected_size == 'L' %}selected{% endif %}>L</option>
-              <option value="XL" {% if selected_size == 'XL' %}selected{% endif %}>XL</option>
-            </select>
-          </div>
-
-          <!-- Color -->
-          <div class="col-md-3 col-sm-6">
-            <label for="color" class="form-label fw-semibold">Color</label>
-            <input type="text" name="color" id="color" class="form-control" placeholder="e.g. Red" value="{{ selected_color }}">
-          </div>
+          
 
           <!-- Price Min -->
           <div class="col-md-3 col-sm-6">
