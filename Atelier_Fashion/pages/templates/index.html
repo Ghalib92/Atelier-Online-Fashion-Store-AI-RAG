@@ -523,23 +523,13 @@
                      style="opacity: 0; transform: translateY(100%); transition: all 0.3s ease;">
                      
 
-                 <div class="d-flex gap-3 mb-4 align-items-center animate__animated animate__pulse animate__infinite">
-      
-<form class="add-to-cart-form" data-product-id="{{ product.id }}">
-  {% csrf_token %}
-        <div class="input-group mb-3" style="max-width: 170px;">
-            <button type="button" class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
-   <i class="fas fa-shopping-cart"></i>
-  </button>
-        </div>
-
-        
-    </form>
+                 <div  >
+    
 </div>
      
                     <a href="{% url 'product_detail' product.id %}">
-                      <button class="btn btn-outline-dark btn-lg mx-1 rounded-pill">
-                           <i class="fas fa-eye"></i>
+                      <button class="  btn-outline-dark btn-lg rounded-pill p-2">
+                           View Details
                       </button>
                     </a>                </div>
             </div>
@@ -548,15 +538,18 @@
                      <p class="card-text text-muted small mb-3"><b>Ksh.{{ product.price}}</b></p>
                      <p class="card-text text-muted small mb-3">{{ product.description|truncatewords:15 }}</p> 
                     <div class="product-meta d-flex flex-wrap">
+
                         <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
-                            <i class="fas fa-ruler me-1"></i>{{ product.get_size_display }}
+                            <i class="fas fa-ruler me-1"></i>{{ product.available_sizes }}
                         </span>
                         <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
-                            <i class="fas fa-palette me-1"></i>{{ product.color }}
+                            <i class="fas fa-palette me-1"></i>{{ product.available_colors }}
                         </span>
+
                         <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
-                            <i class="fas fa-box-open me-1"></i>{{ product.quantity }} left
+                            <i class="fas fa-tags me-1"></i>{{ product.category }}
                         </span>
+                         
                     </div>
                 </div>
             </div>
@@ -625,23 +618,15 @@
 
                  <div class="d-flex gap-3 mb-4 align-items-center animate__animated animate__pulse animate__infinite">
       
-<form class="add-to-cart-form" data-product-id="{{ product.id }}">
-  {% csrf_token %}
-        <div class="input-group mb-3" style="max-width: 170px;">
-            <button type="button" class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
-   <i class="fas fa-shopping-cart"></i>
-  </button>
-        </div>
-
-        
-    </form>
+ 
 </div>
      
-                    <a href="{% url 'product_detail' product.id %}">
-                      <button class="btn btn-outline-dark btn-sm mx-1 rounded-pill">
-                           <i class="fas fa-eye"></i>
+                     <a href="{% url 'product_detail' product.id %}">
+                      <button class="  btn-outline-dark btn-lg rounded-pill p-2">
+                           View Details
                       </button>
-                    </a>                </div>
+                    </a>      
+                                 </div>
             </div>
                    
                      <p class="card-text text-muted small mb-3"><b>{{ product.name }}</b></p>
@@ -649,14 +634,17 @@
                      <p class="card-text text-muted small mb-3">{{ product.description|truncatewords:15 }}</p> 
                     <div class="product-meta d-flex flex-wrap">
                         <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
-                            <i class="fas fa-ruler me-1"></i>{{ product.get_size_display }}
+                            <i class="fas fa-ruler me-1"></i>{{ product.available_sizes }}
                         </span>
                         <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
-                            <i class="fas fa-palette me-1"></i>{{ product.color }}
+                            <i class="fas fa-palette me-1"></i>{{ product.available_colors }}
                         </span>
+
                         <span class="badge bg-light text-dark me-2 mb-2 rounded-pill">
-                            <i class="fas fa-box-open me-1"></i>{{ product.quantity }} left
+                            <i class="fas fa-tags me-1"></i>{{ product.category }}
                         </span>
+                     
+                        
                     </div>
                 </div>
             </div>

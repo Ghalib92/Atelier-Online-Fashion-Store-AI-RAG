@@ -27,6 +27,10 @@ MPESA_STK_PUSH_URL = os.getenv('MPESA_API_URL')
 
 MPESA_AUTH_URL = os.getenv('MPESA_AUTH_URL')
 
+ 
+SITE_URL = "https://yourdomain.com"   # used to build admin links in emails
+ADMIN_EMAIL = "alphaastudios92@gmail.com"  # where low-stock alerts will go
+LOW_STOCK_THRESHOLD = 10
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

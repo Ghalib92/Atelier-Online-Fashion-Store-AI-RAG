@@ -3,6 +3,12 @@ from .models import Product, ProductCategory, Wishlist, Order, Cart, CartItem, O
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.db.models import Sum, Count, F
+from django.utils import timezone
+from datetime import timedelta
+import json
+from django.contrib.auth import get_user_model
+from .models import Order, OrderItem, OrderStatus
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 
@@ -321,22 +327,72 @@ def toggle_wishlist(request, id):
     return redirect('product_detail', id=id)
 
 
-
-@login_required
+User = get_user_model()
 @user_passes_test(lambda u: u.is_superuser)
 def analytics_view(request):
+    # Overview numbers
     total_users = User.objects.count()
     total_products = ProductCategory.objects.count()
     total_orders = Order.objects.count()
-    total_sales = sum(order.total_amount for order in Order.objects.filter(paid=True))
-    low_stock_products = ProductCategory.objects.filter(quantity__lt=10)
+    total_paid_orders = Order.objects.filter(paid=True).count()
+    total_unpaid_orders = total_orders - total_paid_orders
+    total_revenue = Order.objects.filter(paid=True).aggregate(total=Sum('total_amount'))['total'] or 0
 
-    return render(request, 'analytics.html', {
+    # Inventory
+    products = ProductCategory.objects.all().order_by('quantity')
+    low_stock_products = products.filter(quantity__lt=10)
+
+    # Top-selling products (by quantity sold)
+    top_products = (
+        ProductCategory.objects.annotate(sold=Sum('orderitem__quantity'))
+        .order_by('-sold')[:10]
+    )
+
+    # Recent orders
+    recent_orders = Order.objects.select_related('user').prefetch_related('items')\
+                       .order_by('-created_at')[:20]
+
+    # Sales trend last 30 days
+    days = 30
+    start = timezone.now().date() - timedelta(days=days - 1)
+    # build an empty dict of dates -> 0
+    date_list = [(start + timedelta(days=i)).isoformat() for i in range(days)]
+    sales_by_day = {d: 0 for d in date_list}
+
+    qs = (
+        Order.objects.filter(paid=True, created_at__date__gte=start)
+        .extra({'day': "date(created_at)"})
+        .values('day')
+        .annotate(total=Sum('total_amount'))
+        .order_by('day')
+    )
+
+    for row in qs:
+        sales_by_day[row['day'].isoformat()] = float(row['total'] or 0)
+
+    # Prepare chart-friendly arrays
+    sales_chart_labels = list(sales_by_day.keys())
+    sales_chart_data = list(sales_by_day.values())
+
+    # Top products chart
+    top_prod_names = [p.name for p in top_products]
+    top_prod_sold = [int(p.sold or 0) for p in top_products]
+
+    context = {
         'total_users': total_users,
         'total_products': total_products,
         'total_orders': total_orders,
-        'total_sales': total_sales,
+        'total_paid_orders': total_paid_orders,
+        'total_unpaid_orders': total_unpaid_orders,
+        'total_revenue': total_revenue,
+        'products': products,
         'low_stock_products': low_stock_products,
-        'products': Product.objects.all(),
-        'orders': Order.objects.all(),
-    })
+        'top_products': top_products,
+        'recent_orders': recent_orders,
+        # JSON strings for Chart.js
+        'sales_chart_labels_json': json.dumps(sales_chart_labels),
+        'sales_chart_data_json': json.dumps(sales_chart_data),
+        'top_prod_names_json': json.dumps(top_prod_names),
+        'top_prod_sold_json': json.dumps(top_prod_sold),
+    }
+    return render(request, 'analytics.html', context)

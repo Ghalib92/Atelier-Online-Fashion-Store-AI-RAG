@@ -1,30 +1,104 @@
-{% extends 'base.html' %}
-{% block title %}Analytics Dashboard{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Analytics{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>📊 Analytics Dashboard</h2>
-    <hr>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <h4>Overview</h4>
-    <ul>
-        <li>Total Users: {{ total_users }}</li>
-        <li>Total Products: {{ total_products }}</li>
-        <li>Total Orders: {{ total_orders }}</li>
-        <li>Total Sales: Ksh. {{ total_sales }}</li>
-    </ul>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">📊 Shop Analytics</h2>
+    <small class="text-muted">Admin dashboard</small>
+  </div>
 
-    <h4>Low Stock Alerts</h4>
-    {% if low_stock_products %}
-        <ul>
-            {% for product in low_stock_products %}
-                <li>{{ product.name }} - Only {{ product.stock }} left</li>
+  <!-- Stats cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="text-muted">Total Users</h6>
+          <h3>{{ total_users }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="text-muted">Total Products</h6>
+          <h3>{{ total_products }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="text-muted">Total Orders</h6>
+          <h3>{{ total_orders }}</h3>
+          <small class="text-muted">Paid: {{ total_paid_orders }} | Unpaid: {{ total_unpaid_orders }}</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="text-muted">Total Revenue</h6>
+          <h3>Ksh. {{ total_revenue|floatformat:2 }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5>Sales (last 30 days)</h5>
+          <canvas id="salesChart" height="120"></canvas>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mt-4">
+        <div class="card-body">
+          <h5>Top Products (by units sold)</h5>
+          <canvas id="topProductsChart" height="80"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5>Low Stock Items</h5>
+          {% if low_stock_products %}
+            <ul class="list-group list-group-flush">
+            {% for p in low_stock_products %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ p.name }}</strong><br>
+                  <small class="text-muted">SKU: {{ p.id }}</small>
+                </div>
+                <span class="badge bg-danger rounded-pill">{{ p.quantity }}</span>
+              </li>
             {% endfor %}
-        </ul>
-    {% else %}
-        <p>No low stock items 🎉</p>
-    {% endif %}
+            </ul>
+          {% else %}
+            <p class="mb-0">No low stock items 🎉</p>
+          {% endif %}
+        </div>
+      </div>
 
-    <h4>All Products</h4>
+      <div class="card shadow-sm mt-3">
+        <div class="card-body">
+          <h5>Quick Actions</h5>
+          <a href="/admin/" class="btn btn-outline-primary btn-sm mb-2">Open Django Admin</a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<h4 class="mt-4 mb-4">All Products</h4>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -44,26 +118,98 @@
         </tbody>
     </table>
 
-    <h4>All Orders</h4>
-    <table class="table table-striped">
-        <thead>
+  
+  <!-- Recent orders and products tables -->
+  <div class="card mt-4 shadow-sm">
+    <div class="card-body">
+      <h5>Recent Orders</h5>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
             <tr>
-                <th>Order ID</th>
-                <th>User</th>
-                <th>Total Amount</th>
-                <th>Paid</th>
+              <th>Order</th>
+              <th>User</th>
+              <th>Amount</th>
+              <th>Paid</th>
+              <th>Placed</th>
             </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
+          </thead>
+          <tbody>
+            {% for o in recent_orders %}
             <tr>
-                <td>{{ order.id }}</td>
-                <td>{{ order.user.username }}</td>
-                <td>Ksh. {{ order.total_amount }}</td>
-                <td>{{ order.paid }}</td>
+              <td>#{{ o.id }}</td>
+              <td>{{ o.user.username }}</td>
+              <td>Ksh. {{ o.total_amount }}</td>
+              <td>
+                {% if o.paid %}
+                  <span class="badge bg-success">Paid</span>
+                {% else %}
+                  <span class="badge bg-secondary">Pending</span>
+                {% endif %}
+              </td>
+              <td>{{ o.created_at|date:"M d, Y H:i" }}</td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Sales Chart
+  const salesLabels = {{ sales_chart_labels_json|safe }};
+  const salesData = {{ sales_chart_data_json|safe }};
+
+  const salesCtx = document.getElementById('salesChart').getContext('2d');
+  new Chart(salesCtx, {
+    type: 'line',
+    data: {
+      labels: salesLabels,
+      datasets: [{
+        label: 'Sales (Ksh)',
+        data: salesData,
+        tension: 0.25,
+        borderWidth: 2,
+        pointRadius: 2,
+        fill: true
+      }]
+    },
+    options: {
+      scales: {
+        x: { display: false },
+        y: { beginAtZero: true }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // Top Products Chart
+  const topNames = {{ top_prod_names_json|safe }};
+  const topSold = {{ top_prod_sold_json|safe }};
+
+  const topCtx = document.getElementById('topProductsChart').getContext('2d');
+  new Chart(topCtx, {
+    type: 'bar',
+    data: {
+      labels: topNames,
+      datasets: [{
+        label: 'Units sold',
+        data: topSold,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      scales: { x: { beginAtZero: true } },
+      plugins: { legend: { display: false } }
+    }
+  });
+</script>
+
 {% endblock %}
