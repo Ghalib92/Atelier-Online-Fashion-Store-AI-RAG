@@ -50,8 +50,20 @@
           <div class="product-meta mb-4">
             <div class="mb-2"><strong><i class="fas fa-tags me-2"></i>Category:</strong> {{ product.category }}</div>
             <div class="mb-2"><strong><i class="fas fa-palette me-2"></i>Color:</strong> {{ product.available_colors }}</div>
+              <h5>Select Here for Preference</h5>
+        
             <div class="mb-2"><strong><i class="fas fa-ruler-combined me-2"></i>Size:</strong> {{ product.available_sizes }}</div>
             <div><strong><i class="fas fa-warehouse me-2"></i>Availability:</strong> {{ product.stock }} in stock</div>
+          </div>
+          <h5>Check Your Size</h5>
+          <div class="mb-4">
+            <p class="text-muted">Please refer to our size guide to find the perfect fit for you.</p>
+            <a href="https://www.notchespatterns.com/pages/size-chart" class="btn btn-outline-primary" target="_blank">View Size Guide</a>
+          </div>
+  <div class="mb-4">
+
+            <p class="text-muted">Please Fill this part.</p>
+            <p class="text-muted">Select appropriately to customize order</p>
           </div>
 
           <!-- Add to Cart Form -->
@@ -82,10 +94,15 @@
                 <i class="fas fa-plus"></i>
               </button>
             </div>
-
+               {% if user.is_authenticated %}
             <button type="button" class="btn btn-primary w-100 add-to-cart" data-product-id="{{ product.id }}">
               <i class="fas fa-shopping-cart me-2"></i>Add to Cart
             </button>
+            {% else %}
+            <button type="button" class="btn btn-primary w-100 add-to-cart" data-product-id="{{ product.id }}" disabled>
+              <i class="fas fa-shopping-cart me-2"></i>Login to Add to Cart
+            </button>
+            {% endif %}
           </form>
 
           <!-- Wishlist Toggle -->
