@@ -32,12 +32,20 @@ class OrderItemInline(admin.StackedInline):  # change from TabularInline
     can_delete = False
     show_change_link = False
 
+class OrderStatusInline(admin.TabularInline):
+    model = OrderStatus
+    extra = 0
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    inlines = [OrderItemInline]
-    list_display = ['user', 'full_name', 'email', 'phone', 'total_amount', 'items_summary', 'created_at']
-
+    inlines = [OrderItemInline, OrderStatusInline]
+    list_display = ['id', 'user', 'full_name', 'total_amount', 'latest_status', 'created_at']
     readonly_fields = ['user', 'full_name', 'email', 'phone', 'total_amount', 'created_at']
+
+    def latest_status(self, obj):
+        last_status = obj.statuses.last()
+        return last_status.get_status_display() if last_status else "No Status"
+    latest_status.short_description = "Current Status"
 
 @admin.register(Wishlist)
 class WishlistAdmin(admin.ModelAdmin):

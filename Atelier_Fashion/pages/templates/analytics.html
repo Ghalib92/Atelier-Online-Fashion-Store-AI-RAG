@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Analytics Dashboard{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>📊 Analytics Dashboard</h2>
+    <hr>
+
+    <h4>Overview</h4>
+    <ul>
+        <li>Total Users: {{ total_users }}</li>
+        <li>Total Products: {{ total_products }}</li>
+        <li>Total Orders: {{ total_orders }}</li>
+        <li>Total Sales: Ksh. {{ total_sales }}</li>
+    </ul>
+
+    <h4>Low Stock Alerts</h4>
+    {% if low_stock_products %}
+        <ul>
+            {% for product in low_stock_products %}
+                <li>{{ product.name }} - Only {{ product.stock }} left</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No low stock items 🎉</p>
+    {% endif %}
+
+    <h4>All Products</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>Ksh. {{ product.price }}</td>
+                <td>{{ product.quantity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h4>All Orders</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Total Amount</th>
+                <th>Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.user.username }}</td>
+                <td>Ksh. {{ order.total_amount }}</td>
+                <td>{{ order.paid }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

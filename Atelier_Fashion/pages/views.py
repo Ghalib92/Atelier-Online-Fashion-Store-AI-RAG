@@ -1,7 +1,10 @@
 from django.shortcuts import render,get_object_or_404, redirect
 from .models import Product, ProductCategory, Wishlist, Order, Cart, CartItem, OrderItem
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.db.models import Q
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 
 
 # Create your views here.
@@ -279,6 +282,29 @@ def my_orders(request):
     return render(request, 'my_orders.html', {'orders': orders})
 
 
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    latest_status = order.statuses.last().status if order.statuses.exists() else None
+    return render(request, 'order_detail.html', {
+        'order': order,
+        'current_status': latest_status
+    })
+
+
+
+@login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    last_status = order.statuses.last().status if order.statuses.exists() else None
+    
+    if last_status in [None, 'received']:
+        order.delete()  # Or mark as canceled
+        messages.success(request, f"Order #{order.id} has been canceled.")
+    else:
+        messages.error(request, "You can only cancel before delivery starts.")
+
+    return redirect('order_list')
 
 
 @login_required
@@ -293,3 +319,24 @@ def toggle_wishlist(request, id):
     if not created:
         wishlist_item.delete()
     return redirect('product_detail', id=id)
+
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def analytics_view(request):
+    total_users = User.objects.count()
+    total_products = ProductCategory.objects.count()
+    total_orders = Order.objects.count()
+    total_sales = sum(order.total_amount for order in Order.objects.filter(paid=True))
+    low_stock_products = ProductCategory.objects.filter(quantity__lt=10)
+
+    return render(request, 'analytics.html', {
+        'total_users': total_users,
+        'total_products': total_products,
+        'total_orders': total_orders,
+        'total_sales': total_sales,
+        'low_stock_products': low_stock_products,
+        'products': Product.objects.all(),
+        'orders': Order.objects.all(),
+    })

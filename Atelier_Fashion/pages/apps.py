@@ -7,3 +7,6 @@ class PagesConfig(AppConfig):
 
 def ready(self):
     import pages.signals
+
+
+ 

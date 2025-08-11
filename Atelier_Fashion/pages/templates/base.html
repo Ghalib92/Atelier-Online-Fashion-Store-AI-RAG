@@ -257,6 +257,12 @@
   </a>
 </li>
 
+{% if request.user.is_authenticated and request.user.is_superuser %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'analytics' %}">Analytics</a>
+</li>
+{% endif %}
+
 <!-- Authentication -->
 {% if user.is_authenticated %}
   <li class="nav-item">

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+/* Tracking Progress Bar */
+.tracker {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 30px 0;
+    position: relative;
+}
+.tracker::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    width: 90%;
+    height: 4px;
+    background: #ddd;
+    z-index: 0;
+}
+.step {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    width: 33%;
+}
+.step .circle {
+    width: 35px;
+    height: 35px;
+    background: #ddd;
+    border-radius: 50%;
+    margin: 0 auto;
+    line-height: 35px;
+    color: white;
+    font-weight: bold;
+}
+.step.completed .circle {
+    background: #28a745;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.8);
+}
+.step p {
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+/* Cancel Button */
+.cancel-btn {
+    background: #dc3545;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+.cancel-btn:hover {
+    background: #c82333;
+    color: white;
+}
+</style>
+
+<div class="container py-4">
+    <h3 class="mb-3">Order #{{ order.id }}</h3>
+    <p><strong>Total:</strong> Ksh.{{ order.total_amount }}</p>
+    <p><strong>Placed on:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+    <p><strong>Estimated Delivery:</strong> {{ order.estimated_delivery_date|date:"M d, Y" }}</p>
+
+    <!-- Cancel Order Button -->
+    {% if not current_status or current_status == 'received' %}
+        <a href="{% url 'cancel_order' order.id %}" class="cancel-btn mb-3 d-inline-block">Cancel Order</a>
+    {% endif %}
+
+    <!-- Tracking Bar -->
+    <div class="tracker">
+        <div class="step {% if current_status in 'received delivering delivered' %}completed{% endif %}">
+            <div class="circle">1</div>
+            <p>Order Received</p>
+        </div>
+        <div class="step {% if current_status in 'delivering delivered' %}completed{% endif %}">
+            <div class="circle">2</div>
+            <p>Out for Delivery</p>
+        </div>
+        <div class="step {% if current_status == 'delivered' %}completed{% endif %}">
+            <div class="circle">3</div>
+            <p>Delivered</p>
+        </div>
+    </div>
+
+    <!-- Status History -->
+    <h5>Status History:</h5>
+    <ul class="list-group mb-4">
+        {% for status in order.statuses.all %}
+            <li class="list-group-item">
+                {{ status.get_status_display }} — {{ status.timestamp|date:"M d, Y H:i" }}
+            </li>
+        {% empty %}
+            <li class="list-group-item">No status updates yet.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Order Items -->
+    <h5>Items:</h5>
+    <ul class="list-group">
+        {% for item in order.items.all %}
+            <li class="list-group-item">
+                {{ item.quantity }}x {{ item.product.name }} ({{ item.size }}/{{ item.color }})
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

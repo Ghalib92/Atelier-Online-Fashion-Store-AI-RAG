@@ -16,6 +16,9 @@ path('cart/remove/', views.remove_cart_item, name='remove_cart_item'),
 path('search/', views.product_search, name='product_search'),
 path('checkout/', views.checkout_view, name='checkout'),
 path('orders/', views.my_orders, name='order_list'),
+path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
+path('orders/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),
+path('analytics/', views.analytics_view, name='analytics'),
 
 
 ]

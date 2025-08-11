@@ -1,5 +1,5 @@
 from django.db import models
-
+from datetime import timedelta
 class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -186,7 +186,9 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
 
-
+ 
+    def estimated_delivery_date(self):
+        return self.created_at + timedelta(days=3)
 class OrderStatus(models.Model):
     STATUS_CHOICES = [
         ('received', 'Order Received & Processing'),
