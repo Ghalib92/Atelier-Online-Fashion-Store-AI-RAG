@@ -289,7 +289,7 @@
     <h6>Custom fashion. Limitless expression</h6>
   </div>
 
-  <nav class="navbar navbar-expand-lg navbar-custom">
+  <nav class="container-fluid navbar navbar-expand-lg navbar-custom">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -370,29 +370,21 @@
 </li>
 {% endif %}
 
-<!-- Authentication -->
+<!-- User Dropdown Menu -->
 {% if user.is_authenticated %}
-  <li class="nav-item">
-    <span class="nav-link text-light">Welcome, {{ user.username }}</span>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {% if 'logout' in request.path %}active{% endif %}" href="{% url 'logout' %}">
-      <i class="fas fa-sign-out-alt me-1"></i> Logout
-    </a>
-  </li>
-{% else %}
-  <li class="nav-item">
-    <a class="nav-link {% if 'login' in request.path %}active{% endif %}" href="{% url 'login' %}">
-      <i class="fas fa-sign-in-alt me-1"></i> Login
-    </a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link {% if 'signup' in request.path %}active{% endif %}" href="{% url 'signup' %}">
-      <i class="fas fa-user-plus me-1"></i> Signup
-    </a>
-  </li>
-{% endif %}
+<div class="dropdown">
+  <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+    {{ user.username }}
+  </a>
 
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+    <li><a class="dropdown-item" href="#">View Profile</a></li>
+    <li><a class="dropdown-item" href="#">Settings</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Logout</a></li>
+  </ul>
+</div>
+{% endif %}
 
   </nav>
 
