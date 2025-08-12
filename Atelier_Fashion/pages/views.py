@@ -15,19 +15,22 @@ from django.contrib.auth.decorators import user_passes_test
 
 # Create your views here.
 
+def home(request):
+    products = ProductCategory.objects.filter(quantity__gt=0).order_by('-created_at')
 
-def home (request):
-     products = ProductCategory.objects.all().order_by('-created_at')
-     latest = ProductCategory.objects.all().order_by('-created_at')[:8]
+    latest = ProductCategory.objects.filter(quantity__gt=0).order_by('-created_at')[:8]
 
-
-
-     return render(request, 'index.html', {'products': products, 'latest': latest})
-
+    return render(request, 'index.html', {
+        'products': products,
+        'latest': latest
+    })
 
 
 def category_view(request, category_name):
-    products = ProductCategory.objects.filter(category=category_name)
+    products = ProductCategory.objects.filter(
+    category=category_name,
+    quantity__gt=0
+)
 
     # Filters
     size = request.GET.get('size', '').strip()
