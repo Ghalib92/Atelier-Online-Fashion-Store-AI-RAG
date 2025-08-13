@@ -69,7 +69,7 @@ def signup(request):
     return render(request, 'signup.html')  # Show signup form if request is not POST
 def logout(request):
     auth.logout(request)
-    return redirect('login') 
+    return redirect('home')  # Redirect to homepage after logout
 # Create your views here.
 
 
