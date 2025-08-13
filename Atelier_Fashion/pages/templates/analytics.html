@@ -99,47 +99,46 @@
 
 
 <h4 class="mt-5 mb-5">All Products</h4>
+<{% if low_stock_products %}
 <div class="stock-warning mt-5 mb-5">
   <strong>⚠ Low stock warning:</strong>
   <ul>
-    {% for p in products %}
-      {% if p.quantity < 8 %}
-        <li>{{ p.name }} ({{ p.quantity }} left)</li>
-      {% endif %}
+    {% for p in low_stock_products %}
+      <li>{{ p.name }} ({{ p.quantity }} left)</li>
     {% endfor %}
   </ul>
   Please restock in <a href="/admin/" target="_blank">admin panel</a>.
 </div>
-<style>
-    /* Bounce animation for low stock cells */
-    @keyframes bounceZoom {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.15); }
-    }
-    .low-stock {
-        color: #fff;
-        background-color: #e74c3c !important;
-        font-weight: bold;
-        animation: bounceZoom 1.5s infinite;
-        border-radius: 4px;
-        text-align: center;
-    }
+{% endif %}
 
-    /* Low stock warning box */
-    .stock-warning {
-        background: #fff3cd;
-        border-left: 6px solid #ff9800;
-        padding: 15px;
-        border-radius: 6px;
-        margin-bottom: 20px;
-        box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
-        animation: bounceZoom 2.5s infinite;
-    }
-    .stock-warning strong {
-        color: #d35400;
-        font-size: 1.1em;
-    }
+<style>
+@keyframes bounceZoom {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+.low-stock {
+    color: #fff;
+    background-color: #e74c3c !important;
+    font-weight: bold;
+    animation: bounceZoom 1.5s infinite;
+    border-radius: 4px;
+    text-align: center;
+}
+.stock-warning {
+    background: #fff3cd;
+    border-left: 6px solid #ff9800;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
+    animation: bounceZoom 2.5s infinite;
+}
+.stock-warning strong {
+    color: #d35400;
+    font-size: 1.1em;
+}
 </style>
+
 
 <!-- Product table -->
 <table class="table table-bordered table-hover">
