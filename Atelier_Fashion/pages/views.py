@@ -1,401 +1,285 @@
-from django.shortcuts import render,get_object_or_404, redirect
-from .models import Product, ProductCategory, Wishlist, Order, Cart, CartItem, OrderItem
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.db.models import Q
-from django.db.models import Sum, Count, F
-from django.utils import timezone
 from datetime import timedelta
-import json
-from django.contrib.auth import get_user_model
-from .models import Order, OrderItem, OrderStatus
-from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.db import transaction
+from django.db.models import Count, Q, Sum
+from django.conf import settings
+from django.utils import timezone
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# Create your views here.
-
-def home(request):
-    products = ProductCategory.objects.filter(quantity__gt=0).order_by('-created_at')
-
-    latest = ProductCategory.objects.filter(quantity__gt=0).order_by('-created_at')[:8]
-
-    return render(request, 'index.html', {
-        'products': products,
-        'latest': latest
-    })
-
-
-def category_view(request, category_name):
-    products = ProductCategory.objects.filter(
-    category=category_name,
-    quantity__gt=0
+from .models import (
+    Cart,
+    CartItem,
+    Order,
+    OrderItem,
+    Product,
+    ProductCategory,
+    Wishlist,
+)
+from .permissions import IsAdminOrReadOnly
+from .serializers import (
+    CartSerializer,
+    CartItemSerializer,
+    CheckoutSerializer,
+    OrderSerializer,
+    ProductCategorySerializer,
+    ProductSerializer,
+    WishlistSerializer,
 )
 
-    # Filters
-    size = request.GET.get('size', '').strip()
-    color = request.GET.get('color', '').strip()
-    price_min = request.GET.get('price_min', '').strip()
-    price_max = request.GET.get('price_max', '').strip()
-    sort = request.GET.get('sort', '').strip()
-
-    if size:
-        products = products.filter(size=size)
-    if color:
-        products = products.filter(color__iexact=color)
-    if price_min and price_min.isdigit():
-        products = products.filter(price__gte=price_min)
-    if price_max and price_max.isdigit():
-        products = products.filter(price__lte=price_max)
-
-    # Safe sorting options
-    sort_options = {
-        'price_desc': '-price',
-        'price_asc': 'price',
-        'latest': '-created_at',
-        'oldest': 'created_at',
-    }
-    if sort in sort_options:
-        products = products.order_by(sort_options[sort])
-
-    return render(request, 'products.html', {
-        'products': products,
-        'category': category_name.replace('_', ' ').title(),
-        'selected_size': size,
-        'selected_color': color,
-        'price_min': price_min,
-        'price_max': price_max,
-        'selected_sort': sort,
-    })
+COD_SURCHARGE = 200
 
 
+# --------------------------------------------------------------------------- #
+# Catalog
+# --------------------------------------------------------------------------- #
+class ProductViewSet(viewsets.ModelViewSet):
+    """Simple standalone products. Read for all, write for staff."""
 
-def product_detail(request, id):
-    product = get_object_or_404(ProductCategory, id=id)
-
-    # Suggest similar products
-    recommendations = ProductCategory.objects.filter(
-        category=product.category
-    ).exclude(id=product.id)
-
-    # Filter similar ones by color or size
-    similar_products = recommendations.filter(
-    Q(color__iexact=product.color) |
-    Q(size=product.size)
-    )[:8]
-  # limit to 4 suggestions
-  # Wishlist check
-    is_favorited = False
-    if request.user.is_authenticated:
-        is_favorited = Wishlist.objects.filter(user=request.user, product=product).exists()
-
-    return render(request, 'product_details.html', {
-        'product': product,
-        'similar_products': similar_products,
-        'is_favorited': is_favorited
-    })
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_fields = ["size", "color"]
+    search_fields = ["name", "description"]
+    ordering_fields = ["price", "created_at"]
 
 
-from decimal import Decimal
-from django.shortcuts import get_object_or_404, render
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
-from .models import Cart, CartItem, ProductCategory 
-from django.db.models import Sum
-import json
+class ProductCategoryViewSet(viewsets.ModelViewSet):
+    """
+    Main catalog: products grouped by category (dresses, tops, ...).
 
- 
+    Read access is public; create/update/delete is staff-only. Supports
+    filtering by category/size/color, full-text search and ordering.
+    """
+
+    queryset = ProductCategory.objects.all()
+    serializer_class = ProductCategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_fields = ["category", "size", "color"]
+    search_fields = ["name", "description"]
+    ordering_fields = ["price", "created_at"]
+
+    @extend_schema(responses={200: ProductCategorySerializer(many=True)})
+    @action(detail=True, methods=["get"])
+    def similar(self, request, pk=None):
+        """Products in the same category sharing a size or colour."""
+        product = self.get_object()
+        similar = (
+            ProductCategory.objects.filter(category=product.category)
+            .exclude(id=product.id)
+            .filter(Q(color__iexact=product.color) | Q(size=product.size))[:8]
+        )
+        return Response(self.get_serializer(similar, many=True).data)
 
 
+# --------------------------------------------------------------------------- #
+# Cart
+# --------------------------------------------------------------------------- #
+class CartView(RetrieveAPIView):
+    """Return the authenticated user's cart (created on first access)."""
+
+    serializer_class = CartSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        cart, _ = Cart.objects.get_or_create(user=self.request.user)
+        return cart
 
 
+class CartItemViewSet(viewsets.ModelViewSet):
+    """Add, update quantity for, or remove items from the user's cart."""
 
-@login_required
-@require_POST
-def add_to_cart(request, product_id):
-    try:
-        data = json.loads(request.body)
-        quantity = int(data.get('quantity', 1))
-        size = data.get('size')
-        color = data.get('color')
+    serializer_class = CartItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ["get", "post", "patch", "delete"]
 
-        product = get_object_or_404(ProductCategory, id=product_id)
-        cart, created = Cart.objects.get_or_create(user=request.user)
+    def get_queryset(self):
+        return CartItem.objects.filter(cart__user=self.request.user).select_related("product")
 
-        cart_item, created = CartItem.objects.get_or_create(
+    def perform_create(self, serializer):
+        cart, _ = Cart.objects.get_or_create(user=self.request.user)
+        product = serializer.validated_data["product"]
+        quantity = serializer.validated_data.get("quantity", 1)
+        item, created = CartItem.objects.get_or_create(
             cart=cart,
             product=product,
+            size=serializer.validated_data.get("size"),
+            color=serializer.validated_data.get("color"),
         )
-
         if not created:
-            cart_item.quantity += quantity
+            item.quantity += quantity
         else:
-            cart_item.quantity = quantity
-
-        # Optional: if you want to store size/color, add those fields to CartItem model
-        cart_item.size = size
-        cart_item.color = color
-
-        cart_item.save()
-
-        cart_count = cart.items.aggregate(total=Sum('quantity'))['total'] or 0
-        return JsonResponse({'success': True, 'cart_count': cart_count})
-
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=400)@login_required
-def view_cart(request):
-    cart = Cart.objects.filter(user=request.user).first()
-    return render(request, 'cart.html', {'cart': cart})
-
-
-from django.views.decorators.http import require_POST
-from django.http import JsonResponse
-
-@require_POST
-def update_cart_quantity(request):
-    item_id = request.POST.get('item_id')
-    action = request.POST.get('action')
-
-    try:
-        item = CartItem.objects.get(id=item_id, cart__user=request.user)
-        if action == 'increment':
-            item.quantity += 1
-        elif action == 'decrement':
-            if item.quantity > 1:
-                item.quantity -= 1
+            item.quantity = quantity
         item.save()
-
-        cart = item.cart
-        cart_count = cart.items.aggregate(total=Sum('quantity'))['total'] or 0
-        return JsonResponse({
-            'success': True,
-            'quantity': item.quantity,
-            'item_total': item.total_price,
-            'cart_total': cart.total_price,
-            'cart_count': cart_count,
-        })
-    except CartItem.DoesNotExist:
-        return JsonResponse({'success': False}, status=404)
+        serializer.instance = item
 
 
+# --------------------------------------------------------------------------- #
+# Wishlist
+# --------------------------------------------------------------------------- #
+class WishlistViewSet(viewsets.ModelViewSet):
+    """The authenticated user's wishlist."""
 
-@require_POST
-def remove_cart_item(request):
-    item_id = request.POST.get('item_id')
-    try:
-        item = CartItem.objects.get(id=item_id, cart__user=request.user)
-        item.delete()
-        cart = item.cart
-        cart_count = cart.items.aggregate(total=Sum('quantity'))['total'] or 0
-        return JsonResponse({
-            'success': True,
-            'cart_total': cart.total_price,
-            'cart_count': cart_count,
-        })
-    except CartItem.DoesNotExist:
-        return JsonResponse({'success': False}, status=404)
+    serializer_class = WishlistSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ["get", "post", "delete"]
+
+    def get_queryset(self):
+        return Wishlist.objects.filter(user=self.request.user).select_related("product")
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @extend_schema(request=None, responses={200: OpenApiResponse(description="Toggled.")})
+    @action(detail=False, methods=["post"], url_path="toggle/(?P<product_id>[^/.]+)")
+    def toggle(self, request, product_id=None):
+        """Add the product to the wishlist, or remove it if already present."""
+        item = Wishlist.objects.filter(user=request.user, product_id=product_id).first()
+        if item:
+            item.delete()
+            return Response({"in_wishlist": False})
+        Wishlist.objects.create(user=request.user, product_id=product_id)
+        return Response({"in_wishlist": True}, status=status.HTTP_201_CREATED)
 
 
+# --------------------------------------------------------------------------- #
+# Orders & checkout
+# --------------------------------------------------------------------------- #
+class OrderViewSet(viewsets.ReadOnlyModelViewSet):
+    """List and retrieve the authenticated user's orders."""
 
- 
-from django.shortcuts import render
-from django.db.models import Q
- 
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-def product_search(request):
-    query = request.GET.get('q', '').strip()
-    results = ProductCategory.objects.none()
-    
-    if query:
-        results = ProductCategory.objects.filter(
-            Q(name__icontains=query) |
-            Q(description__icontains=query)
+    def get_queryset(self):
+        return (
+            Order.objects.filter(user=self.request.user)
+            .prefetch_related("items__product", "statuses")
+            .order_by("-created_at")
         )
 
-    return render(request, 'search_results.html', {
-        'query': query,
-        'results': results
-    })
+    @extend_schema(request=None, responses={200: OpenApiResponse(description="Order cancelled.")})
+    @action(detail=True, methods=["post"])
+    def cancel(self, request, pk=None):
+        """Cancel an order, only allowed before delivery has started."""
+        order = self.get_object()
+        last = order.statuses.last()
+        if last is None or last.status == "received":
+            order.delete()
+            return Response({"detail": "Order cancelled."})
+        return Response(
+            {"detail": "You can only cancel before delivery starts."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
-from .models import Order, Cart
-from django.conf import settings
 
-@login_required
-def checkout_view(request):
-    cart = Cart.objects.filter(user=request.user).first()
-    if not cart or cart.items.count() == 0:
-        return render(request, 'checkout.html', {'error': 'Cart is empty'})
+class CheckoutView(APIView):
+    """Create an order from the user's cart (Cash on Delivery or M-Pesa)."""
 
-    total = cart.total_price
+    permission_classes = [permissions.IsAuthenticated]
 
-    if request.method == 'POST':
-        full_name = request.POST['full_name']
-        email = request.POST['email']
-        phone = request.POST['phone']
-        address = request.POST['address']
-        payment_method = request.POST['payment_method']
+    @extend_schema(request=CheckoutSerializer, responses={201: OrderSerializer})
+    def post(self, request):
+        serializer = CheckoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
 
-        if payment_method == 'cod':
-            total += 200
+        cart = Cart.objects.filter(user=request.user).first()
+        if not cart or cart.items.count() == 0:
+            return Response({"detail": "Your cart is empty."}, status=status.HTTP_400_BAD_REQUEST)
 
+        total = cart.total_price
+        if data["payment_method"] == "cod":
+            total += COD_SURCHARGE
+
+        with transaction.atomic():
             order = Order.objects.create(
                 user=request.user,
-                full_name=full_name,
-                email=email,
-                phone=phone,
-                address=address,
-                payment_method='cod',
+                full_name=data["full_name"],
+                email=data["email"],
+                phone=data["phone"],
+                address=data["address"],
+                payment_method=data["payment_method"],
                 total_amount=total,
-                paid=False
+                paid=False,
             )
-            for item in cart.items.all():
+            for item in cart.items.select_related("product").all():
                 OrderItem.objects.create(
                     order=order,
                     product=item.product,
                     quantity=item.quantity,
                     size=item.size,
-                    color=item.color
+                    color=item.color,
                 )
+            if data["payment_method"] == "cod":
+                cart.items.all().delete()
 
-            # ✅ Clear the cart
-            cart.items.all().delete()
-
+        if data["payment_method"] == "cod":
             send_mail(
-                'Order Confirmation',
-                f'Thank you {full_name}, your order has been received. Delivery to:\n{address}\nAmount: Ksh.{total}',
+                "Order Confirmation",
+                f"Thank you {data['full_name']}, your order #{order.id} has been received.\n"
+                f"Delivery to: {data['address']}\nAmount: Ksh.{total}",
                 settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False
+                [data["email"]],
+                fail_silently=True,
             )
 
-            return redirect('order_list')
-        elif payment_method == 'mpesa':
-            request.session['checkout_data'] = {
-                'full_name': full_name,
-                'email': email,
-                'phone': phone,
-                'address': address,
-                'total': str(total)
-            }
-            return redirect('payment_page')
-
-    return render(request, 'checkout.html', {'total': total})
-
-@login_required
-def my_orders(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'my_orders.html', {'orders': orders})
+        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 
-@login_required
-def order_detail(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    latest_status = order.statuses.last().status if order.statuses.exists() else None
-    return render(request, 'order_detail.html', {
-        'order': order,
-        'current_status': latest_status
-    })
+# --------------------------------------------------------------------------- #
+# Analytics (admin only)
+# --------------------------------------------------------------------------- #
+class AnalyticsView(APIView):
+    """Store-wide sales and inventory metrics. Staff only."""
 
+    permission_classes = [permissions.IsAdminUser]
 
+    @extend_schema(responses={200: OpenApiResponse(description="Store metrics.")})
+    def get(self, request):
+        total_orders = Order.objects.count()
+        paid_orders = Order.objects.filter(paid=True).count()
+        revenue = Order.objects.filter(paid=True).aggregate(t=Sum("total_amount"))["t"] or 0
 
-@login_required
-def cancel_order(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    last_status = order.statuses.last().status if order.statuses.exists() else None
-    
-    if last_status in [None, 'received']:
-        order.delete()  # Or mark as canceled
-        messages.success(request, f"Order #{order.id} has been canceled.")
-    else:
-        messages.error(request, "You can only cancel before delivery starts.")
+        top_products = list(
+            ProductCategory.objects.annotate(sold=Sum("orderitem__quantity"))
+            .filter(sold__gt=0)
+            .order_by("-sold")[:10]
+            .values("id", "name", "sold")
+        )
 
-    return redirect('order_list')
+        days = int(request.query_params.get("period", 30))
+        start = timezone.now().date() - timedelta(days=days - 1)
+        sales = (
+            Order.objects.filter(paid=True, created_at__date__gte=start)
+            .values("created_at__date")
+            .annotate(total=Sum("total_amount"))
+            .order_by("created_at__date")
+        )
 
-
-@login_required
-def wishlist_view(request):
-    wishlist_items = Wishlist.objects.filter(user=request.user).select_related('product')
-    return render(request, 'wishlist.html', {'wishlist_items': wishlist_items})
-
-@login_required
-def toggle_wishlist(request, id):
-    product = get_object_or_404(ProductCategory, id=id)
-    wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, product=product)
-    if not created:
-        wishlist_item.delete()
-    return redirect('product_detail', id=id)
-
-
-User = get_user_model()
-@user_passes_test(lambda u: u.is_superuser)
-def analytics_view(request):
-    # Overview numbers
-    total_users = User.objects.count()
-    total_products = ProductCategory.objects.count()
-    total_orders = Order.objects.count()
-    total_paid_orders = Order.objects.filter(paid=True).count()
-    total_unpaid_orders = total_orders - total_paid_orders
-    total_revenue = Order.objects.filter(paid=True).aggregate(total=Sum('total_amount'))['total'] or 0
-
-    # Inventory
-    products = ProductCategory.objects.all().order_by('quantity')
-    low_stock_products = products.filter(quantity__lt=10)
-
-    # Top-selling products (by quantity sold)
-    top_products = (
-        ProductCategory.objects.annotate(sold=Sum('orderitem__quantity'))
-        .order_by('-sold')[:10]
-    )
-
-    # Recent orders
-    recent_orders = Order.objects.select_related('user').prefetch_related('items')\
-                       .order_by('-created_at')[:20]
-
-    # Sales trend last 30 days
-    days = 30
-    start = timezone.now().date() - timedelta(days=days - 1)
-    # build an empty dict of dates -> 0
-    date_list = [(start + timedelta(days=i)).isoformat() for i in range(days)]
-    sales_by_day = {d: 0 for d in date_list}
-
-    qs = (
-        Order.objects.filter(paid=True, created_at__date__gte=start)
-        .extra({'day': "date(created_at)"})
-        .values('day')
-        .annotate(total=Sum('total_amount'))
-        .order_by('day')
-    )
-
-    for row in qs:
-        sales_by_day[row['day'].isoformat()] = float(row['total'] or 0)
-
-    # Prepare chart-friendly arrays
-    sales_chart_labels = list(sales_by_day.keys())
-    sales_chart_data = list(sales_by_day.values())
-
-    # Top products chart
-    top_prod_names = [p.name for p in top_products]
-    top_prod_sold = [int(p.sold or 0) for p in top_products]
-
-    context = {
-        'total_users': total_users,
-        'total_products': total_products,
-        'total_orders': total_orders,
-        'total_paid_orders': total_paid_orders,
-        'total_unpaid_orders': total_unpaid_orders,
-        'total_revenue': total_revenue,
-        'products': products,
-        'low_stock_products': low_stock_products,
-        'top_products': top_products,
-        'recent_orders': recent_orders,
-        # JSON strings for Chart.js
-        'sales_chart_labels_json': json.dumps(sales_chart_labels),
-        'sales_chart_data_json': json.dumps(sales_chart_data),
-        'top_prod_names_json': json.dumps(top_prod_names),
-        'top_prod_sold_json': json.dumps(top_prod_sold),
-    }
-    return render(request, 'analytics.html', context)
+        return Response({
+            "totals": {
+                "users": User.objects.count(),
+                "products": ProductCategory.objects.count(),
+                "orders": total_orders,
+                "paid_orders": paid_orders,
+                "unpaid_orders": total_orders - paid_orders,
+                "revenue": revenue,
+            },
+            "low_stock_products": list(
+                ProductCategory.objects.filter(quantity__lt=settings.LOW_STOCK_THRESHOLD)
+                .values("id", "name", "quantity")
+            ),
+            "top_products": top_products,
+            "sales_trend": [
+                {"date": row["created_at__date"].isoformat(), "total": float(row["total"] or 0)}
+                for row in sales
+            ],
+            "period_days": days,
+        })

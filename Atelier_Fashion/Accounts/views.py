@@ -1,115 +1,42 @@
-from django.shortcuts import render
-from django.shortcuts import render,redirect
-from django.template import loader
-from django.http import HttpResponse
-from django .contrib.auth.models import User, auth
-from django.contrib.auth import logout
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect,get_object_or_404
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+
+from .serializers import (
+    ChangePasswordSerializer,
+    RegisterSerializer,
+    UserSerializer,
+)
 
 
+class RegisterView(generics.CreateAPIView):
+    """Register a new customer account."""
+
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]
 
 
-def login(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = auth.authenticate(username=username, password=password)
+class ProfileView(generics.RetrieveUpdateAPIView):
+    """Retrieve or update the authenticated user's profile."""
 
-        if user is not None:
-            auth.login(request, user)
-            messages.success(request, 'Login successful! Welcome back.')
-            return redirect('home')  # Redirect to homepage or dashboard
-        else:
-            messages.error(request, 'Invalid username or password!')
-            return redirect('login')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    return render(request, 'login.html')
+    def get_object(self):
+        return self.request.user
 
 
-def signup(request):
-    if request.method == 'POST':
-        first_name = request.POST['first_name']   
-        last_name = request.POST['last_name'] 
-        username = request.POST['username'] 
-        password1 = request.POST['password1'] 
-        password2 = request.POST['password2']  # Fixed the typo
-        email = request.POST['email']
+class ChangePasswordView(generics.GenericAPIView):
+    """Change the authenticated user's password."""
 
-        # Check if passwords match
-        if password1 != password2:
-            messages.error(request, "Passwords do not match!")
-            return redirect('signup')  # Redirect back to the signup page
+    serializer_class = ChangePasswordSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-        # Check if username already exists
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already taken!")
-            return redirect('signup')
-
-        # Check if email already exists
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "Email is already registered!")
-            return redirect('signup')
-
-        # Create the user
-        user = User.objects.create_user(
-            username=username, 
-            email=email, 
-            password=password1,
-            first_name=first_name,
-            last_name=last_name
-        )
-        user.save()
-
-        messages.success(request, "Account created successfully! You can now log in.")
-        return redirect('login')  # Redirect to login page after successful signup
-
-    return render(request, 'signup.html')  # Show signup form if request is not POST
-def logout(request):
-    auth.logout(request)
-    return redirect('home')  # Redirect to homepage after logout
-# Create your views here.
-
-
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
-
-@login_required
-def profile_view(request):
-    if request.method == 'POST':
-        user = request.user
-        user.username = request.POST.get('username')
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
-        user.email = request.POST.get('email')
-        user.save()
-        messages.success(request, "Profile updated successfully!")
-        return redirect('profile')
-    
-    return render(request, 'profile.html')
-
-
-
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
-
-@login_required
-def change_password(request):
-    if request.method == 'POST':
-        form = PasswordChangeForm(user=request.user, data=request.POST)
-        if form.is_valid():
-            user = form.save()
-            update_session_auth_hash(request, user)  # Prevent logout
-            messages.success(request, "Password changed successfully.")
-            return redirect('profile')
-        else:
-            messages.error(request, "Please correct the error below.")
-    else:
-        form = PasswordChangeForm(user=request.user)
-    return render(request, 'change_password.html', {'form': form})
-
-
+    @extend_schema(responses={200: OpenApiResponse(description="Password updated.")})
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "Password updated successfully."})

@@ -1,93 +1,101 @@
-# payments/views.py
 import json
-import requests
-from django.conf import settings
-from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from pages.models import Cart  # Adjust based on your actual cart model
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from pages.models import Cart, Order
 from .models import PaymentTransaction
-from django.contrib.auth.decorators import login_required
 from .mpesa import lipa_na_mpesa
-from pages.models import Order
+from .serializers import PaymentTransactionSerializer, STKPushSerializer
 
 
-@login_required
-def payment_page(request):
-    cart = Cart.objects.filter(user=request.user).first()
-    total = cart.total_price if cart else 0
+class STKPushView(APIView):
+    """Trigger an M-Pesa STK push prompt for an unpaid order."""
 
-    # Convert total to int (or float if needed)
-    numeric_total = int(total)  # or float(total) if you need decimal cents support
+    permission_classes = [permissions.IsAuthenticated]
 
-    if request.method == 'POST':
-        phone = request.POST.get('phone')
-        if not phone or numeric_total <= 0:
-            return render(request, 'pay.html', {'total': total, 'message': 'Invalid phone or cart total'})
+    @extend_schema(request=STKPushSerializer, responses={200: OpenApiResponse(description="STK push result.")})
+    def post(self, request):
+        serializer = STKPushSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        response = lipa_na_mpesa(phone, numeric_total, request.user.username)
+        order = get_object_or_404(
+            Order, id=serializer.validated_data["order_id"], user=request.user
+        )
+        phone = serializer.validated_data["phone"]
+        amount = int(order.total_amount)
 
-        # Save transaction
+        result = lipa_na_mpesa(phone, amount, request.user.username)
+
         PaymentTransaction.objects.create(
+            order=order,
             user=request.user,
             phone=phone,
-            amount=total,
-            checkout_request_id=response.get('CheckoutRequestID', ''),
-            status="Pending"
+            amount=order.total_amount,
+            checkout_request_id=result.get("CheckoutRequestID", ""),
+            status="Pending",
+        )
+        return Response(
+            {"detail": result.get("CustomerMessage", "Payment initiated."), "raw": result}
         )
 
-        return render(request, 'pay.html', {'total': total, 'message': response.get('CustomerMessage', 'Payment Initiated')})
 
-    return render(request, 'pay.html', {'total': total})
-@csrf_exempt
-def mpesa_callback(request):
-    data = json.loads(request.body.decode('utf-8'))
-    body = data.get('Body', {})
-    stk_callback = body.get('stkCallback', {})
+class MpesaCallbackView(APIView):
+    """
+    Safaricom Daraja callback webhook. Public (no auth) but only acts on a
+    matching pending transaction. Marks the order paid on success.
+    """
 
-    checkout_id = stk_callback.get('CheckoutRequestID')
-    result_code = stk_callback.get('ResultCode')
-    metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
-    amount_paid = 0
-    phone = ''
-    for item in metadata:
-        if item['Name'] == 'Amount':
-            amount_paid = item['Value']
-        if item['Name'] == 'PhoneNumber':
-            phone = str(item['Value'])
+    @extend_schema(request=None, responses={200: OpenApiResponse(description="Acknowledged.")})
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return Response({"ResultCode": 1, "ResultDesc": "Invalid payload"})
 
-    try:
-        txn = PaymentTransaction.objects.get(checkout_request_id=checkout_id)
-        cart = Cart.objects.get(user=txn.user)
-        cart_total = cart.total_price if cart else 0
+        stk = data.get("Body", {}).get("stkCallback", {})
+        checkout_id = stk.get("CheckoutRequestID")
+        result_code = stk.get("ResultCode")
+        metadata = {
+            item.get("Name"): item.get("Value")
+            for item in stk.get("CallbackMetadata", {}).get("Item", [])
+        }
+        amount_paid = metadata.get("Amount", 0)
 
-        if result_code == 0 and int(amount_paid) == int(cart_total):
-            txn.status = 'Success'
+        try:
+            txn = PaymentTransaction.objects.get(checkout_request_id=checkout_id)
+        except PaymentTransaction.DoesNotExist:
+            return Response({"ResultCode": 0, "ResultDesc": "Accepted"})
+
+        if result_code == 0 and int(amount_paid or 0) == int(txn.amount):
+            txn.status = "Success"
             txn.paid_at = timezone.now()
             txn.save()
-
-            # Clear cart
-            cart.items.all().delete()
-
+            if txn.order:
+                txn.order.paid = True
+                txn.order.save()  # triggers stock reduction + confirmation email
+            cart = Cart.objects.filter(user=txn.user).first()
+            if cart:
+                cart.items.all().delete()
         else:
-            txn.status = 'Failed'
+            txn.status = "Failed"
             txn.save()
 
-    except PaymentTransaction.DoesNotExist:
-        pass
-
-    return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
+        return Response({"ResultCode": 0, "ResultDesc": "Accepted"})
 
 
-def payment_success(request):
-    return render(request, 'success.html')
+class TransactionListView(generics.ListAPIView):
+    """List the authenticated user's payment transactions."""
 
+    serializer_class = PaymentTransactionSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-
-@login_required
-def my_orders(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'my_orders.html', {'orders': orders})
-
+    def get_queryset(self):
+        return PaymentTransaction.objects.filter(user=self.request.user).order_by("-id")

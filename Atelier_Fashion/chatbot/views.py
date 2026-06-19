@@ -1,70 +1,43 @@
-from django.shortcuts import render
+import logging
 
-# Create your views here.
-from django.shortcuts import render
-from django.shortcuts import render, redirect 
-from src.helper import download_hugging_face_embeddings
-from langchain_pinecone import PineconeVectorStore
-from langchain_openai import OpenAI
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate
-from dotenv import load_dotenv
-from src.prompt import *
-import os
+from drf_spectacular.utils import extend_schema
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
- 
+from .rag import ChatbotUnavailable, answer_question
+from .serializers import ChatRequestSerializer, ChatResponseSerializer
 
-load_dotenv()
-
-PINECONE_API_KEY=os.environ.get('PINECONE_API_KEY')
-OPENAI_API_KEY=os.environ.get('OPENAI_API_KEY')
-
-os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
-os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
-
-embeddings = download_hugging_face_embeddings()
+logger = logging.getLogger(__name__)
 
 
-index_name = "atelier"
+class ChatView(APIView):
+    """
+    Ask the fashion-assistant chatbot a question.
 
-# Embed each chunk and upsert the embeddings into your Pinecone index.
-docsearch = PineconeVectorStore.from_existing_index(
-    index_name=index_name,
-    embedding=embeddings
-)
+    Backed by a RAG pipeline (Pinecone retrieval + OpenAI generation over a
+    fashion knowledge base). Returns 503 if the chatbot is not configured.
+    """
 
-retriever = docsearch.as_retriever(search_type="similarity", search_kwargs={"k":3})
+    permission_classes = [permissions.AllowAny]
 
+    @extend_schema(request=ChatRequestSerializer, responses={200: ChatResponseSerializer})
+    def post(self, request):
+        serializer = ChatRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        message = serializer.validated_data["message"]
 
-llm = OpenAI(temperature=0.4, max_tokens=500)
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", system_prompt),
-        ("human", "{input}"),
-    ]
-)
+        try:
+            answer = answer_question(message)
+        except ChatbotUnavailable as exc:
+            return Response(
+                {"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception:  # pragma: no cover - upstream/model failures
+            logger.exception("Chatbot failed to answer")
+            return Response(
+                {"detail": "The chatbot failed to answer. Please try again later."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
 
-question_answer_chain = create_stuff_documents_chain(llm, prompt)
-rag_chain = create_retrieval_chain(retriever, question_answer_chain)
-
-
- 
-
-
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse,HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-
-def chatbot_page(request):
-    return render(request, 'chat.html')
-
-def get_response(request):
-    if request.method == 'POST':
-        msg = request.POST.get('msg')
-        if msg:
-            response = rag_chain.invoke({"input": msg})
-            return HttpResponse(response["answer"])
-    else:
-        return HttpResponse("Invalid request")
+        return Response({"answer": answer})

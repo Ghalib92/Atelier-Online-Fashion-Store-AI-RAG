@@ -40,6 +40,9 @@ class Product(models.Model):
         return "low-stock"
      return "out-of-stock"
     
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         return self.name
 
@@ -80,7 +83,7 @@ class ProductCategory (models.Model):
       ('tops','Tops'),
       
     ]
-    category = models.CharField( choices=category_options, default= 'occassion')
+    category = models.CharField(max_length=20, choices=category_options, default='dresses')
     # Optional image field for product photos
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     image_2 = models.ImageField(upload_to='products/', blank=True, null=True)
@@ -95,6 +98,9 @@ class ProductCategory (models.Model):
         if not self.available_sizes:
             return []
         return [size.strip() for size in self.available_sizes.split(',') if size.strip()]
+
+    class Meta:
+        ordering = ['-created_at']
 
     def get_colors(self):
         if not self.available_colors:
