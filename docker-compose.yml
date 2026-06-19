@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: atelier_db
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - .env
+
+  web:
+    build: .
+    container_name: atelier_web
+    restart: unless-stopped
+    volumes:
+      - static_volume:/app/Atelier_Fashion/staticfiles
+      - media_volume:/app/Atelier_Fashion/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "
+        python manage.py migrate --noinput &&
+        python manage.py collectstatic --noinput &&
+        gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 Atelier_Fashion.wsgi:application
+      "
+
+volumes:
+  postgres_data:
+    name: atelier_postgres_data
+  static_volume:
+    name: atelier_static_files
+  media_volume:
+    name: atelier_media_files
