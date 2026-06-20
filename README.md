@@ -43,7 +43,7 @@ JWT-authenticated, documented with an interactive OpenAPI (Swagger) UI, containe
 .
 ├── Atelier_Fashion/          # Django project
 │   ├── Atelier_Fashion/      # settings, root urls, wsgi/asgi
-│   ├── pages/                # catalog, cart, wishlist, orders, checkout, analytics
+│   ├── store/                # catalog, cart, wishlist, orders, checkout, analytics
 │   ├── Accounts/             # JWT auth (register / login / profile / password)
 │   ├── payments/             # M-Pesa STK push + callback + transactions
 │   ├── chatbot/              # RAG chat endpoint (lazy-loaded pipeline)
