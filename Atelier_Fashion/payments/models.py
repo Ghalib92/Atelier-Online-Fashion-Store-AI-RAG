@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from pages.models import Order
+from store.models import Order
 
 class PaymentTransaction(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)

@@ -7,7 +7,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from pages.models import Cart, Order
+from store.models import Cart, Order
 from .models import PaymentTransaction
 from .mpesa import lipa_na_mpesa
 from .serializers import PaymentTransactionSerializer, STKPushSerializer

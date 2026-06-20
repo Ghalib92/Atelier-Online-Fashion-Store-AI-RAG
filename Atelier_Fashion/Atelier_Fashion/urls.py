@@ -14,7 +14,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # API
     path("api/auth/", include("Accounts.urls")),
-    path("api/", include("pages.urls")),
+    path("api/", include("store.urls")),
     path("api/payments/", include("payments.urls")),
     path("api/chatbot/", include("chatbot.urls")),
     # OpenAPI schema & interactive docs

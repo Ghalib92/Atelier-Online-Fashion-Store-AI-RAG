@@ -1,8 +1,8 @@
 from django.apps import AppConfig
 
-class PagesConfig(AppConfig):
+class StoreConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'pages'
+    name = 'store'
 
     def ready(self):
-        import pages.signals
+        import store.signals

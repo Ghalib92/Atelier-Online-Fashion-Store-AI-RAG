@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "drf_spectacular",
     # Local
-    "pages",
+    "store",
     "Accounts",
     "payments",
     "chatbot",

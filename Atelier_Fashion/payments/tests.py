@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from pages.models import Order
+from store.models import Order
 from .models import PaymentTransaction
 
 
